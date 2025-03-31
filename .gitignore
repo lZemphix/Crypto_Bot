@@ -1,0 +1,5 @@
+.env
+**/__pycache__
+PLAN.md
+logs.log
+src/test.py
