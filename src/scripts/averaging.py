@@ -39,7 +39,7 @@ class Averaging(BotBase):
         avg_order = self.get_avg_order()
         actual_price = float(self.gatekeeper.get_updated_klines()[0][4])
         step_buy = get_bot_config('stepBuy')
-        logger.info('price diff: %s, strp_buy: %s', (avg_order - actual_price), step_buy)
+        logger.info('price diff: %s, step: %s', round(avg_order - actual_price, 3), step_buy)
         price_lower_than_step = step_buy < (avg_order - actual_price)
         return (actual_price < avg_order and price_lower_than_step)
 
@@ -48,7 +48,7 @@ class Averaging(BotBase):
         min_sell_price = self.journal.get()['sell_lines'][0]
         min_buy_price = self.journal.get()['buy_lines'][0]
         logger.info(f'Avergaging for ${last_order}. Balance: {balance["USDT"]}. Min price for sell: ${min_sell_price}. Min price for averate: ${min_buy_price}')
-        self.notify.bought(f'Avergaging for ${last_order}\nBalance: {balance["USDT"]}\nMin price for sell: ${min_sell_price}\nMin price for averate: ${min_buy_price}')
+        self.notify.bought(f'```\nAvergaging price: {last_order} USDT\nBalance: {balance["USDT"]}\nSell line: ${min_sell_price}\nAverage line: ${min_buy_price}```')
 
     def update_journal(self, last_order: float):
         data = self.journal.get()
@@ -68,6 +68,6 @@ class Averaging(BotBase):
                         time.sleep(2)
                         last_order = self.orders.get_order_history()[0].get('avgPrice')
                         if self.update_journal(float(last_order)):
-                            if self.lines.write_lines(float(last_order)-self.stepBuy):
+                            if self.lines.write_lines(float(last_order)):
                                 self.send_notify_(last_order)
                                 return True
