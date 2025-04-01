@@ -49,6 +49,7 @@ class Bot(BotBase):
         usdt_balance = round(self.gatekeeper.get_updated_balance()['USDT'],3)
         amount_buy = self.amount_buy
         self.telenotify.warning(f'Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```')
+        logger.warning(f'Not enough money! Balance: {usdt_balance}. Min order price: {amount_buy}')
 
     def activate(self):
         self.activate_message()
@@ -58,6 +59,7 @@ class Bot(BotBase):
             if self.balance_trigger.invalid_balance():
                 self.nem_notify()
                 while self.balance_trigger.invalid_balance():
+                    self.current_state = BotState.SELL
                     if Sell().activate():
                         self.current_state = BotState.FIRST_BUY
                         

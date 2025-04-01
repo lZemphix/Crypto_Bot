@@ -1,3 +1,4 @@
+import time
 from client.bases import BotBase
 from client.orders import Orders    
 from logging import getLogger
@@ -64,6 +65,7 @@ class Averaging(BotBase):
                 logger.info('valid_price')
                 if self.trigger.cross_down_to_up():
                     if self.orders.place_buy_order():
+                        time.sleep(2)
                         last_order = self.orders.get_order_history()[0].get('avgPrice')
                         if self.update_journal(float(last_order)):
                             if self.lines.write_lines(float(last_order)-self.stepBuy):

@@ -43,7 +43,7 @@ class Sell(BotBase):
         if self.price_valid():
             if self.trigger.cross_up_to_down():
                 if self.orders.place_sell_order():
-                    time.sleep(1)
+                    time.sleep(2)
                     self._send_notify()
                     self.journal.clear()
                     return True
