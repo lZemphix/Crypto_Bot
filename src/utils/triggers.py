@@ -51,5 +51,17 @@ class CrossKlinesTrigger(BotBase):
             if prev_kline > sell_line >= current_kline:
                 return True
         return False        
-        
+
+
+class BalanceTrigger(BotBase):
+    def __init__(self):
+        super().__init__()
+        self.gatekeeper = Gatekeeper()
+
+    def invalid_balance(self):
+        balance = self.gatekeeper.get_updated_balance()['USDT']
+        while balance < self.amount_buy:
+            return True
+
+
         

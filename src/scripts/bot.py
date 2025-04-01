@@ -10,6 +10,7 @@ from scripts.first_buy import FirstBuy
 from utils.klines_manager import KlinesManager
 from utils.telenotify import TeleNotify
 from src.consts import *
+from utils.triggers import BalanceTrigger
 
 
 logger = getLogger(__name__)
@@ -23,6 +24,8 @@ class Bot(BotBase):
         self.klines = KlinesManager()
         self.journal = JournalManager()
         self.gatekeeper = Gatekeeper()
+        self.balance_trigger = BalanceTrigger()
+        self.telenotify = TeleNotify()
     
     def price_side(self):
         orders = self.journal.get()['orders']
@@ -38,15 +41,26 @@ class Bot(BotBase):
             coin_balance = round(self.gatekeeper.get_updated_balance()[self.coin_name],3)
         except:
             coin_balance = 0.00
-        TeleNotify().bot_status(BOT_STARTED_MESSAGE.format(symbol=self.symbol, usdt_balance=usdt_balance, 
+        self.telenotify.bot_status(BOT_STARTED_MESSAGE.format(symbol=self.symbol, usdt_balance=usdt_balance, 
                                                            coin_name=self.coin_name, coin_balance=coin_balance,
                                                            interval=interval, amount_buy=amount_buy))
+
+    def nem_notify(self):
+        usdt_balance = round(self.gatekeeper.get_updated_balance()['USDT'],3)
+        amount_buy = self.amount_buy
+        self.telenotify.warning(f'Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```')
 
     def activate(self):
         self.activate_message()
         while self.current_state != BotState.STOPPED:
             logger.info('current state: %s', self.current_state)
             
+            if self.balance_trigger.invalid_balance():
+                self.nem_notify()
+                while self.balance_trigger.invalid_balance():
+                    if Sell().activate():
+                        self.current_state = BotState.FIRST_BUY
+                        
             if self.current_state == BotState.WAITING:
 
                 if len(self.journal.get()['orders']) == 0:
@@ -56,15 +70,16 @@ class Bot(BotBase):
                 else:
                     self.current_state = BotState.AVERAGING
 
-            elif self.current_state == BotState.AVERAGING:
+            if self.current_state == BotState.AVERAGING:
                 if Averaging().activate():
                     self.current_state = BotState.WAITING
             
-            elif self.current_state == BotState.SELL:
+            if self.current_state == BotState.SELL:
                 if Sell().activate():
                     self.current_state = BotState.FIRST_BUY
             
-            elif self.current_state == BotState.FIRST_BUY:
+            if self.current_state == BotState.FIRST_BUY:
                 if FirstBuy().activate():
                     self.current_state = BotState.WAITING
+        
 

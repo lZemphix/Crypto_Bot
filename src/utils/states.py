@@ -7,6 +7,7 @@ class BotState(enum.Enum):
     SELL = enum.auto()
     AVERAGING = enum.auto()
     STOPPED = enum.auto()
+    NEM = enum.auto()
 
     @staticmethod
     def transitions() -> dict:
