@@ -21,13 +21,13 @@ class Gatekeeper:
 
     def update_balance(self) -> bool:
         try: balance = Account().get_balance()
-        except: balance = self.get()['balance']
+        except: balance = self.get()['balance']; logger.info('except balance')
         self.valid_data['balance'] = balance
         return True
     
     def update_klines(self) -> bool:
         try: klines = Klines().get_klines()
-        except: klines = self.get()['klines']
+        except: klines = self.get()['klines']; logger.info('except klines')
         self.valid_data['klines'] = klines
         return True
     

@@ -2,6 +2,7 @@ from logging import getLogger
 from scripts.bot import Bot
 from config.logger_config import load_logger_config
 from src.consts import *
+import traceback
 
 import random
 
@@ -18,6 +19,7 @@ def main():
         Bot().activate()
     except Exception as e:
         err_id = random.randint(1_000_000,9_999_999)
+        traceback.print_exception(type(e), e, e.__traceback__)
         logger.error(f'Error id: {err_id}. Message:{e}')
         TeleNotify().error(CRUSH_MESSAGE.format(error_id=err_id))
 
