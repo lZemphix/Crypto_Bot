@@ -14,11 +14,14 @@ class IndicatorTrigger(BotBase):
         self.klines = KlinesManager()
 
     def rsi_trigger(self):
-        df = self.klines.get_klines_dataframe()
-        current_rsi = ta.momentum.rsi(df.close).iloc[-1]
-        return current_rsi <= self.RSI
-    
-
+        try:
+            df = self.klines.get_klines_dataframe()
+            current_rsi = ta.momentum.rsi(df.close).iloc[-1]
+            return current_rsi <= self.RSI
+        except ValueError:
+            logger.warning("rsi trigger returned invalid data")
+            return False
+        
 class CrossKlinesTrigger(BotBase):
 
     def __init__(self):
