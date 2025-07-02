@@ -1,6 +1,6 @@
 import enum
 
-    
+
 class BotState(enum.Enum):
     FIRST_BUY = enum.auto()
     WAITING = enum.auto()
@@ -15,9 +15,10 @@ class BotState(enum.Enum):
             BotState.FIRST_BUY: [BotState.SELL, BotState.STOPPED, BotState.AVERAGING],
             BotState.AVERAGING: [BotState.SELL, BotState.STOPPED],
             BotState.SELL: [BotState.STOPPED, BotState.FIRST_BUY],
-            BotState.STOPPED: [BotState.FIRST_BUY]
+            BotState.STOPPED: [BotState.FIRST_BUY],
         }
         return transitions
+
 
 class BuyState(enum.Enum):
     WAITING = enum.auto()
@@ -30,11 +31,11 @@ class BuyState(enum.Enum):
         transitions = {
             BuyState.WAITING: [BuyState.STOPPED, BuyState.BALANCE_CORRECT],
             BuyState.BALANCE_CORRECT: [BuyState.PRICE_CORRECT],
-            BuyState.PRICE_CORRECT: [BuyState.STOPPED]
-
+            BuyState.PRICE_CORRECT: [BuyState.STOPPED],
         }
         return transitions
-    
+
+
 class SellState(enum.Enum):
     WAITING = enum.auto()
     PRICE_CORRECT = enum.auto()
@@ -44,6 +45,6 @@ class SellState(enum.Enum):
     def transitions() -> dict:
         transitions = {
             SellState.WAITING: [SellState.STOPPED, SellState.PRICE_CORRECT],
-            SellState.PRICE_CORRECT: [SellState.STOPPED]
+            SellState.PRICE_CORRECT: [SellState.STOPPED],
         }
         return transitions

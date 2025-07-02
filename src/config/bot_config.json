@@ -1,9 +1,9 @@
 {
-    "symbol" : "TONUSDT",
-    "interval" : "5",
-    "amountBuy" : 5,
+    "symbol": "BTCUSDT",
+    "interval": "5",
+    "amountBuy": 5,
     "RSI": 41,
-    "stepBuy": 0.03,
-    "stepSell": 0.03,
+    "stepBuy": 750,
+    "stepSell": 650,
     "send_notify": true
 }

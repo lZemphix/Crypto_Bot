@@ -1,4 +1,5 @@
-from client.bases import Client
+from client.base import Client
+
 
 class Klines(Client):
 
@@ -7,10 +8,15 @@ class Klines(Client):
 
     def get_klines(self, limit: int = 200) -> dict:
         try:
-            kline = self.client.get_kline(symbol=self.symbol, interval=self.interval, limit=limit, category='spot')
-            return kline['result']['list']
+            kline = self.client.get_kline(
+                symbol=self.symbol,
+                interval=self.interval,
+                limit=limit,
+                category="spot",
+            )
+            return kline["result"]["list"]
         except:
             return None
 
-    
 
+get_klines = Klines()
