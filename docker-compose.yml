@@ -1,0 +1,15 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ACCOUNT_TYPE: ${ACCOUNT_TYPE}
+      API_KEY_SECRET: ${API_KEY_SECRET}
+      API_KEY: ${API_KEY}
+      BOT_TOKEN: ${BOT_TOKEN}
+      CHAT_ID: ${CHAT_ID}
+      DB_NAME: ${DB_NAME}
+    volumes:
+      - ./src/config/bot_config.json:/src/config/bot_config.json
+      - ./src/src/trade_journal.json:/src/src/trade_journal.json
