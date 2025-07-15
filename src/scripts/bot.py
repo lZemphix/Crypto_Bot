@@ -71,9 +71,6 @@ class Bot(Bot):
     def activate(self):
         self.activate_message()
         while self.current_state != BotState.STOPPED:
-            logger.info("current state: %s", self.current_state)
-            logger.info("Price diff: %s", self.price_side())
-
             if self.balance_trigger.invalid_balance():
                 self.nem_notify()
                 logger.info("State: sell")
