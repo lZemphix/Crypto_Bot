@@ -1,10 +1,10 @@
 import time
-from client.base import Bot
+from client.base import BotBase
 from client.orders import get_orders
 from logging import getLogger
 
 from config.config import get_bot_config
-from utils.gatekeeper import Gatekeeper
+from utils.gatekeeper import gatekeeper
 from utils.klines_manager import KlinesManager
 from utils.journal_manger import JournalManager
 from utils.lines_manager import LinesManager
@@ -14,12 +14,11 @@ from utils.triggers import CrossKlinesTrigger
 logger = getLogger(__name__)
 
 
-class Averaging(Bot):
+class Averaging(BotBase):
 
     def __init__(self) -> None:
         super().__init__()
         self.klines = KlinesManager()
-        self.gatekeeper = Gatekeeper()
         self.journal = JournalManager()
         self.lines = LinesManager()
         self.trigger = CrossKlinesTrigger()
@@ -31,19 +30,19 @@ class Averaging(Bot):
         return (sum(orders) / len(orders)) if len(orders) > 0 else 0
 
     def valid_balance(self):
-        usdt_balance = self.gatekeeper.get_updated_balance()["USDT"]
+        usdt_balance = gatekeeper.get_updated_balance()["USDT"]
         amount_buy_price = get_bot_config("amountBuy")
         return usdt_balance > amount_buy_price
 
     def valid_price(self):
         avg_order = self.get_avg_order()
-        actual_price = float(self.gatekeeper.get_updated_klines()[0][4])
+        actual_price = float(gatekeeper.get_updated_klines()[0][4])
         step_buy = get_bot_config("stepBuy")
         price_lower_than_step = step_buy < (avg_order - actual_price)
         return actual_price < avg_order and price_lower_than_step
 
     def send_notify_(self, last_order: float):
-        balance = self.gatekeeper.get_updated_balance()
+        balance = gatekeeper.get_updated_balance()
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
         logger.info(

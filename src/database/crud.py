@@ -8,13 +8,11 @@ logger = getLogger(__name__)
 
 
 class StatisticTable:
-    
+
     @staticmethod
     def add_statistic(balance: float, actions: int = 0, profit: float = 0):
         with sync_session() as conn:
-            statistic = Statistic(
-                balance=balance, actions=actions, profit=profit
-            )
+            statistic = Statistic(balance=balance, actions=actions, profit=profit)
             conn.add(statistic)
             conn.commit()
 

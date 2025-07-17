@@ -1,18 +1,18 @@
 from logging import getLogger
 import time
-from client.base import Bot
+from client.base import BotBase
 from client.klines import Klines
 from client.orders import Orders
-from utils.gatekeeper import Gatekeeper
+from utils.gatekeeper import gatekeeper
 from utils.journal_manger import JournalManager
 from utils.states import SellState
-from utils.telenotify import TeleNotify
+from utils.telenotify import Telenotify
 from utils.triggers import CrossKlinesTrigger
 
 logger = getLogger(__name__)
 
 
-class Sell(Bot):
+class Sell(BotBase):
 
     def __init__(self) -> None:
         super().__init__()
@@ -20,8 +20,7 @@ class Sell(Bot):
         self.journal = JournalManager()
         self.orders = Orders()
         self.trigger = CrossKlinesTrigger()
-        self.telenotify = TeleNotify()
-        self.gatekeeper = Gatekeeper()
+        self.telenotify = Telenotify()
         self.current_state = SellState.WAITING
         self.transisions = SellState.transitions()
 
@@ -30,9 +29,17 @@ class Sell(Bot):
         return (sum(orders) / len(orders)) if len(orders) > 0 else 0
 
     def price_valid(self):
-        actual_price = float(self.gatekeeper.get_updated_klines()[0][4])
-        logger.debug(actual_price)
+        actual_price = gatekeeper.get_updated_klines()
         sell_price = self.get_avg_order() + self.stepSell
+        try:
+            if actual_price != None:
+                if isinstance(actual_price, list):
+                    actual_price = float(actual_price[0][4])
+            else:
+                actual_price = 0
+        except: 
+            pass
+        logger.debug(actual_price)
         return actual_price >= sell_price
 
     def _send_notify(self):

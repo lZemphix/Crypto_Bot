@@ -1,4 +1,5 @@
 import sys
+import time
 from client.account import account
 from client.klines import get_klines
 from logging import getLogger
@@ -30,6 +31,7 @@ class Gatekeeper:
     def update_klines(self) -> bool:
         try:
             klines = get_klines.get_klines()
+            time.sleep(0.5)
         except Exception:
             klines = self.get()["klines"]
             logger.info("except klines")
@@ -49,3 +51,5 @@ class Gatekeeper:
         except Exception:
             pass
         return self.get()["klines"]
+
+gatekeeper = Gatekeeper()

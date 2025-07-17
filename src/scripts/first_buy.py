@@ -1,39 +1,38 @@
 import time
 from utils.lines_manager import LinesManager
 from utils.states import BuyState
-from client.base import Bot
+from client.base import BotBase
 from client.orders import Orders
 from client.klines import Klines
-from utils.telenotify import TeleNotify
+from utils.telenotify import Telenotify
 from utils.triggers import BalanceTrigger, IndicatorTrigger
 from logging import getLogger
-from src.consts import FIRST_BUY_MESSAGE
-from utils.gatekeeper import Gatekeeper
+from data.consts import FIRST_BUY_MESSAGE
+from utils.gatekeeper import gatekeeper
 from utils.journal_manger import JournalManager
 
 
 logger = getLogger(__name__)
 
 
-class FirstBuy(Bot):
+class FirstBuy(BotBase):
 
     def __init__(self):
         super().__init__()
         self.orders = Orders()
         self.klines = Klines()
         self.trigger = IndicatorTrigger()
-        self.gatekeeper = Gatekeeper()
         self.journal = JournalManager()
         self.current_state = BuyState.WAITING
-        self.notify = TeleNotify()
+        self.notify = Telenotify()
         self.lines = LinesManager()
         self.balance_trigger = BalanceTrigger()
 
     def valid_balance(self):
-        return self.gatekeeper.get_updated_balance()["USDT"] > self.amount_buy
+        return gatekeeper.get_updated_balance()["USDT"] > self.amount_buy
 
     def send_notify_(self, last_order: float):
-        balance = self.gatekeeper.get_updated_balance()["USDT"]
+        balance = gatekeeper.get_updated_balance()["USDT"]
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
 
@@ -50,7 +49,7 @@ class FirstBuy(Bot):
         )
 
     def nem_notify(self):
-        usdt_balance = round(self.gatekeeper.get_updated_balance()["USDT"], 3)
+        usdt_balance = round(gatekeeper.get_updated_balance()["USDT"], 3)
         amount_buy = self.amount_buy
         self.telenotify.warning(
             f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```"
@@ -65,7 +64,7 @@ class FirstBuy(Bot):
 
     def activate(self) -> bool:
         while self.current_state != BuyState.STOPPED:
-
+            time.sleep(0.5)
             if self.current_state == BuyState.PRICE_CORRECT:
                 if self.orders.place_buy_order():
                     time.sleep(2)

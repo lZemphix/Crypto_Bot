@@ -4,7 +4,7 @@ import requests, os, dotenv
 dotenv.load_dotenv()
 
 
-class TeleNotify:
+class Telenotify:
     def __init__(self, status: bool = True) -> None:
         self.status = status
         self.TOKEN = os.getenv("BOT_TOKEN")

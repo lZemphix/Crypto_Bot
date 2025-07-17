@@ -1,6 +1,6 @@
 from logging import getLogger
-from utils.gatekeeper import Gatekeeper
-from client.base import Bot
+from utils.gatekeeper import gatekeeper
+from client.base import BotBase
 from utils.klines_manager import KlinesManager
 import ta.momentum
 
@@ -9,7 +9,7 @@ from utils.journal_manger import JournalManager
 logger = getLogger(__name__)
 
 
-class IndicatorTrigger(Bot):
+class IndicatorTrigger(BotBase):
     def __init__(self):
         super().__init__()
         self.klines = KlinesManager()
@@ -24,14 +24,13 @@ class IndicatorTrigger(Bot):
             return False
 
 
-class CrossKlinesTrigger(Bot):
+class CrossKlinesTrigger(BotBase):
 
     def __init__(self):
-        self.gatekeeper = Gatekeeper()
         self.journal = JournalManager()
 
     def get_klines(self):
-        klines = self.gatekeeper.get_updated_klines()
+        klines = gatekeeper.get_updated_klines()
         current_kline = float(klines[0][4])
         prev_kline = float(klines[1][4])
         return current_kline, prev_kline
@@ -51,22 +50,18 @@ class CrossKlinesTrigger(Bot):
 
     def cross_up_to_down(self):  # Продажа
         current_kline, prev_kline = self.get_klines()
-        logger.info("curr %s, prev %s", current_kline, prev_kline)
         sell_lines: list[float] = self.get_lines()[1]
         for sell_line in sell_lines[::-1]:
-            logger.info("prev > sellL: %s", prev_kline > sell_line)
-            logger.info("sellL >= curr: %s", sell_line >= current_kline)
             if prev_kline > sell_line >= current_kline:
                 return True
         return False
 
 
-class BalanceTrigger(Bot):
+class BalanceTrigger(BotBase):
     def __init__(self):
         super().__init__()
-        self.gatekeeper = Gatekeeper()
 
     def invalid_balance(self):
-        balance = self.gatekeeper.get_updated_balance()["USDT"]
+        balance = gatekeeper.get_updated_balance()["USDT"]
         while balance < self.amount_buy:
             return True

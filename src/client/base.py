@@ -1,6 +1,6 @@
 from config.config import get_bot_config, get_env_config
 from utils.states import BuyState
-from utils.telenotify import TeleNotify
+from utils.telenotify import Telenotify
 from pybit.unified_trading import HTTP
 from logging import getLogger
 
@@ -24,7 +24,7 @@ class Client:
         )
 
 
-class Bot:
+class BotBase:
     def __init__(self) -> None:
 
         self.symbol: str = get_bot_config("symbol")
@@ -35,4 +35,4 @@ class Bot:
         self.stepSell: float = get_bot_config("stepSell")
         self.send_notify: bool = get_bot_config("send_notify")
         self.RSI: float = get_bot_config("RSI")
-        self.notify = TeleNotify(True if self.send_notify else False)
+        self.telenotify = Telenotify(True if self.send_notify else False)

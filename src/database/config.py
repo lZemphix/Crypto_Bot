@@ -6,7 +6,7 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    DB_NAME: str = os.getenv('DB_NAME')
+    DB_NAME: str = os.getenv("DB_NAME")
 
     @property
     def db_url(self) -> str:

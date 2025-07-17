@@ -9,12 +9,12 @@ class JournalManager:
         super().__init__()
 
     def get(self):
-        with open(f"src/src/trade_journal.json") as f:
+        with open(f"src/data/trade_journal.json") as f:
             journal = json.load(f)
             return journal
 
     def update(self, data: dict):
-        with open("src/src/trade_journal.json", "w") as journal:
+        with open("src/data/trade_journal.json", "w") as journal:
             data = json.dump(data, journal, indent=4)
 
     def clear(self):
