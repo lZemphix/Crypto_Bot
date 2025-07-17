@@ -21,22 +21,22 @@ class Telenotify:
         else:
             pass
 
-    def bot_status(self, message: str):
+    def bot_status(self, message: str) -> int:
         status_code = self.send_message("🔔Bot status!", message)
         return status_code
 
-    def bought(self, message: str):
+    def bought(self, message: str) -> int:
         status_code = self.send_message("📉Buy!", message)
         return status_code
 
-    def sold(self, message: str):
+    def sold(self, message: str) -> int:
         status_code = self.send_message("📈Sell!", message)
         return status_code
 
-    def error(self, message: str):
+    def error(self, message: str) -> int:
         status_code = self.send_message("❌Error!", message)
         return status_code
 
-    def warning(self, message: str):
+    def warning(self, message: str) -> int:
         status_code = self.send_message("⚠️Warning!", message)
         return status_code
