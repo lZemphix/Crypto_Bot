@@ -9,6 +9,7 @@ logger = getLogger(__name__)
 class KlinesManager:
     def __init__(self):
         pass
+
     def get_klines_dataframe(self) -> pd.DataFrame:
         try:
             klines = gatekeeper.get_updated_klines()

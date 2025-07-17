@@ -4,7 +4,7 @@ from client.base import BotBase
 from utils.klines_manager import KlinesManager
 import ta.momentum
 
-from utils.journal_manger import JournalManager
+from utils.journal_manager import JournalManager
 
 logger = getLogger(__name__)
 

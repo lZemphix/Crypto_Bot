@@ -52,4 +52,5 @@ class Gatekeeper:
             pass
         return self.get()["klines"]
 
+
 gatekeeper = Gatekeeper()

@@ -1,7 +1,7 @@
 from logging import getLogger
 from config.config import get_bot_config
 from utils.gatekeeper import Gatekeeper
-from utils.journal_manger import JournalManager
+from utils.journal_manager import JournalManager
 
 logger = getLogger(__name__)
 

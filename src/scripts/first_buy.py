@@ -9,7 +9,7 @@ from utils.triggers import BalanceTrigger, IndicatorTrigger
 from logging import getLogger
 from data.consts import FIRST_BUY_MESSAGE
 from utils.gatekeeper import gatekeeper
-from utils.journal_manger import JournalManager
+from utils.journal_manager import JournalManager
 
 
 logger = getLogger(__name__)

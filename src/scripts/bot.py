@@ -4,7 +4,7 @@ import time
 from scripts.averaging import Averaging
 from scripts.sell import Sell
 from utils.gatekeeper import gatekeeper
-from utils.journal_manger import JournalManager
+from utils.journal_manager import JournalManager
 from utils.states import BotState
 from client.base import BotBase
 from scripts.first_buy import FirstBuy
@@ -16,11 +16,12 @@ from utils.triggers import BalanceTrigger
 
 logger = getLogger(__name__)
 
+
 class Price(BotBase):
     def __init__(self):
         super().__init__()
         self.journal = JournalManager()
-    
+
     def price_side(self):
         orders = self.journal.get()["orders"]
         avg_order = sum(orders) / (len(orders) if len(orders) != 0 else 1)
@@ -28,24 +29,21 @@ class Price(BotBase):
             price = float(gatekeeper.get_updated_klines()[0][4])
             return round(price - avg_order, 3)
         except TypeError:
-            logger.warning('TypeError. Return 0')
+            logger.warning("TypeError. Return 0")
             return 0
+
 
 class Notifications(BotBase):
     def __init__(self):
         super().__init__()
         self.journal = JournalManager()
 
-
-
     def activate_message(self):
         usdt_balance = round(gatekeeper.get_updated_balance()["USDT"], 3)
         interval = self.interval
         amount_buy = self.amount_buy
         try:
-            coin_balance = round(
-                gatekeeper.get_updated_balance()[self.coin_name], 3
-            )
+            coin_balance = round(gatekeeper.get_updated_balance()[self.coin_name], 3)
         except:
             coin_balance = 0.00
         self.telenotify.bot_status(
@@ -69,6 +67,7 @@ class Notifications(BotBase):
             f"Not enough money! Balance: {usdt_balance}. Min order price: {amount_buy}"
         )
 
+
 class Bot(BotBase):
 
     def __init__(self):
@@ -79,7 +78,6 @@ class Bot(BotBase):
         self.journal = JournalManager()
         self.balance_trigger = BalanceTrigger()
         self.telenotify = Telenotify()
-
 
     def activate(self):
         Notifications().activate_message()

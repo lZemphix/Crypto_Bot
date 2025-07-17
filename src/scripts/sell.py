@@ -4,7 +4,7 @@ from client.base import BotBase
 from client.klines import Klines
 from client.orders import Orders
 from utils.gatekeeper import gatekeeper
-from utils.journal_manger import JournalManager
+from utils.journal_manager import JournalManager
 from utils.states import SellState
 from utils.telenotify import Telenotify
 from utils.triggers import CrossKlinesTrigger
@@ -37,7 +37,7 @@ class Sell(BotBase):
                     actual_price = float(actual_price[0][4])
             else:
                 actual_price = 0
-        except: 
+        except:
             pass
         logger.debug(actual_price)
         return actual_price >= sell_price

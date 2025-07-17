@@ -6,7 +6,7 @@ from logging import getLogger
 from config.config import get_bot_config
 from utils.gatekeeper import gatekeeper
 from utils.klines_manager import KlinesManager
-from utils.journal_manger import JournalManager
+from utils.journal_manager import JournalManager
 from utils.lines_manager import LinesManager
 from utils.states import BuyState
 from utils.triggers import CrossKlinesTrigger
