@@ -13,4 +13,4 @@ services:
       DB_NAME: ${DB_NAME}
     volumes:
       - ./src/config/bot_config.json:/src/config/bot_config.json
-      - ./src/src/trade_journal.json:/src/src/trade_journal.json
+      - ./src/data/trade_journal.json:/src/data/trade_journal.json
