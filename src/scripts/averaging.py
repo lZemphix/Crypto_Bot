@@ -6,6 +6,7 @@ from logging import getLogger
 from config.config import get_bot_config
 from utils.gatekeeper import gatekeeper
 from utils.journal_manager import JournalManager
+from utils.lines_manager import LinesManager
 from utils.states import BuyState
 from utils.triggers import CrossKlinesTrigger
 
@@ -60,6 +61,7 @@ class Averaging(Checkup):
     def __init__(self) -> None:
         super().__init__()
         self.current_state = BuyState.WAITING
+        self.lines = LinesManager()
 
     def activate(self):
         logger.info("Averaging activation started")
