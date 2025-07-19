@@ -33,6 +33,6 @@ class BotBase:
         self.amount_buy: float = get_bot_config("amountBuy")
         self.stepBuy: float = get_bot_config("stepBuy")
         self.stepSell: float = get_bot_config("stepSell")
-        self.send_notify: bool = get_bot_config("send_notify")
+        self.notify_status: bool = get_bot_config("send_notify")
         self.RSI: float = get_bot_config("RSI")
-        self.telenotify = Telenotify(True if self.send_notify else False)
+        self.telenotify = Telenotify(True if self.notify_status else False)
