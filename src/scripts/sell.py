@@ -16,7 +16,6 @@ class Checkup(BotBase):
     def __init__(self) -> None:
         super().__init__()
         self.orders = Orders()
-        self.telenotify = Telenotify()
 
     def price_valid(self):
         actual_price = gatekeeper.get_updated_klines()
