@@ -1,5 +1,6 @@
 services:
   bot:
+    container_name: cmx_bot
     build:
       context: .
       dockerfile: Dockerfile
