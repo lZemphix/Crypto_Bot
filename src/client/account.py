@@ -17,8 +17,8 @@ class Account(Client):
                 coin_values[get_balance[n].get("coin")] = float(
                     get_balance[n].get("walletBalance")
                 )
-            return coin_values if coin_values != {} else {}
-        except:
+            return coin_values
+        except Exception:
             raise NoCryptoCurrencyException("No cryptocurrencies found!")
 
 
