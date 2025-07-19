@@ -73,47 +73,57 @@ class Bot(BotBase):
     def __init__(self):
         super().__init__()
         self.current_state = BotState.WAITING
-        self.transitions = BotState.transitions()
         self.klines = KlinesManager()
         self.journal = JournalManager()
         self.balance_trigger = BalanceTrigger()
-        self.telenotify = Telenotify()
 
     def activate(self):
+        logger.info("Bot activation started")
         Notifications().activate_message()
         while self.current_state != BotState.STOPPED:
             time.sleep(0.5)
+            logger.debug(f"Current state: {self.current_state}")
             if self.balance_trigger.invalid_balance():
                 self.nem_notify()
                 logger.info("State: sell")
                 while self.balance_trigger.invalid_balance():
+                    logger.debug("Not enough money for buying, switching to SELL state")
                     self.current_state = BotState.SELL
                     if Sell().activate():
+                        logger.info("Sold successful, switching to FIRST_BUY state")
                         self.current_state = BotState.FIRST_BUY
 
             if self.current_state == BotState.WAITING:
-
+                logger.debug("State: WAITING")
                 if len(self.journal.get()["orders"]) == 0:
+                    logger.info("No orders, setting FIRST_BUY state")
                     self.current_state = BotState.FIRST_BUY
                 elif Price().price_side() > 0:
+                    logger.info("Coin price > 0. Switching to SELL state")
                     self.current_state = BotState.SELL
                 else:
+                    logger.info("Coin price < 0. Switching to AVERAGING state")
                     self.current_state = BotState.AVERAGING
 
             if self.current_state == BotState.AVERAGING:
-                logger.info("State: avg")
-
                 if Averaging().activate():
+                    logger.info("Averaging activated, switching to WAITING state")
                     self.current_state = BotState.WAITING
                 else:
+                    logger.info("Averaging not activated, staying in WAITING state")
                     self.current_state = BotState.WAITING
 
             if self.current_state == BotState.SELL:
+                logger.info("State: SELL")
                 if Sell().activate():
+                    logger.info("Sell activated, switching to FIRST_BUY state")
                     self.current_state = BotState.FIRST_BUY
                 else:
+                    logger.info("Sell not activated, switching to WAITING state")
                     self.current_state = BotState.WAITING
 
             if self.current_state == BotState.FIRST_BUY:
+                logger.info("State: FIRST_BUY")
                 if FirstBuy().activate():
+                    logger.info("Bought, switching to WAITING state")
                     self.current_state = BotState.WAITING
