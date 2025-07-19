@@ -8,19 +8,20 @@ class DateManager:
 
     def date_delta(self) -> bool:
         last_stat = (StatisticTable().get_all_statistic())[-1]
+        if not last_stat:
+            return True
         delta = datetime.datetime.now() - last_stat.date
         one_day = datetime.timedelta(days=1)
         if delta >= one_day:
             return True
-        else:
-            return False
+        return False
 
 
 class StatisticManager:
     def __init__(self):
         self.dateM = DateManager()
 
-    def add_statistic(self, balance: float, actions: int, profit: float):
+    def add_statistic(self, balance: float, actions: int, profit: float) -> None:
         if self.dateM.date_delta():
             StatisticTable().add_statistic(
                 balance=balance, actions=actions, profit=profit
