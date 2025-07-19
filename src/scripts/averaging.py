@@ -5,25 +5,19 @@ from logging import getLogger
 
 from config.config import get_bot_config
 from utils.gatekeeper import gatekeeper
-from utils.klines_manager import KlinesManager
 from utils.journal_manager import JournalManager
-from utils.lines_manager import LinesManager
 from utils.states import BuyState
 from utils.triggers import CrossKlinesTrigger
 
 logger = getLogger(__name__)
 
 
-class Averaging(BotBase):
+class Checkup(BotBase):
 
     def __init__(self) -> None:
         super().__init__()
-        self.klines = KlinesManager()
         self.journal = JournalManager()
-        self.lines = LinesManager()
         self.trigger = CrossKlinesTrigger()
-        self.current_state = BuyState.WAITING
-        self.transitions = BuyState.transitions()
 
     def get_avg_order(self):
         orders = self.journal.get()["orders"]
@@ -41,14 +35,14 @@ class Averaging(BotBase):
         price_lower_than_step = step_buy < (avg_order - actual_price)
         return actual_price < avg_order and price_lower_than_step
 
-    def send_notify_(self, last_order: float):
+    def send_notify(self, last_order: float):
         balance = gatekeeper.get_updated_balance()
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
         logger.info(
             f'Avergaging for ${last_order}. Balance: {balance["USDT"]}. Min price for sell: ${min_sell_price}. Min price for averate: ${min_buy_price}'
         )
-        self.notify.bought(
+        self.telenotify.bought(
             f'```\nAvergaging price: {last_order} USDT\nBalance: {balance["USDT"]}\nSell line: ${min_sell_price}\nAverage line: ${min_buy_price}```'
         )
 
@@ -60,16 +54,30 @@ class Averaging(BotBase):
         self.journal.update(data)
         return True
 
+
+class Averaging(Checkup):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.current_state = BuyState.WAITING
+
     def activate(self):
+        logger.info("Averaging activation started")
         if self.valid_balance():
             logger.info("valid_balance")
             if self.valid_price():
                 logger.info("valid_price")
                 if self.trigger.cross_down_to_up():
+                    logger.info("Trigger cross_down_to_up activated")
                     if get_orders.place_buy_order():
+                        logger.info("Buy order placed successfully")
                         time.sleep(2)
                         last_order = get_orders.get_order_history()[0].get("avgPrice")
+                        logger.debug(f"Last order price: {last_order}")
                         if self.update_journal(float(last_order)):
+                            logger.info("Journal updated with new order")
                             if self.lines.write_lines(float(last_order)):
-                                self.send_notify_(last_order)
+                                logger.info("Lines written successfully")
+                                self.send_notify(last_order)
+                                logger.info("Notification sent for averaging")
                                 return True
