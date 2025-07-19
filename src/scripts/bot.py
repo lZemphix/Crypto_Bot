@@ -43,7 +43,7 @@ class Notifications(BotBase):
         interval = self.interval
         amount_buy = self.amount_buy
         try:
-            coin_balance = round(gatekeeper.get_updated_balance()[self.coin_name], 3)
+            coin_balance = f"{gatekeeper.get_updated_balance()[self.coin_name]:.10f}"
         except:
             coin_balance = 0.00
         self.telenotify.bot_status(
