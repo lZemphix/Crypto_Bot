@@ -2,7 +2,6 @@
 import json
 import os
 import sys
-
 from src.data.consts import *
 
 
@@ -36,18 +35,18 @@ def change_config(param: str, new_value: str | int | bool):
 
 def settings():
     with open("src/config/bot_config.json", "r") as f:
-        c = json.load(f)
+        config = json.load(f)
 
     choice = int(
         input(
             SETTINGS_MENU.format(
-                sybmol=c["symbol"],
-                interval=c["interval"],
-                amount=c["amountBuy"],
-                rsi=c["RSI"],
-                buy=c["stepBuy"],
-                sell=c["stepSell"],
-                notifies=c["send_notify"],
+                sybmol=config["symbol"],
+                interval=config["interval"],
+                amount=config["amountBuy"],
+                rsi=config["RSI"],
+                buy=config["stepBuy"],
+                sell=config["stepSell"],
+                notifies=config["send_notify"],
             )
         )
     )
