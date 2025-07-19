@@ -15,7 +15,7 @@ class JournalManager:
 
     def update(self, data: dict):
         with open("src/data/trade_journal.json", "w") as journal:
-            data = json.dump(data, journal, indent=4)
+            json.dump(data, journal, indent=4)
 
     def clear(self):
         data = dict(laps=0, orders=[], buy_lines=[], sell_lines=[])
