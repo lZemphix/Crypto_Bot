@@ -5,8 +5,6 @@ logger = getLogger(__name__)
 
 
 class JournalManager:
-    def __init__(self):
-        super().__init__()
 
     def get(self):
         with open(f"src/data/trade_journal.json") as f:

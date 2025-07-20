@@ -4,7 +4,6 @@ from client.base import BotBase
 from utils.klines_manager import KlinesManager
 import ta.momentum
 
-from utils.journal_manager import JournalManager
 
 logger = getLogger(__name__)
 
@@ -27,12 +26,12 @@ class IndicatorTrigger(BotBase):
 class CrossKlinesTrigger(BotBase):
 
     def __init__(self):
-        self.journal = JournalManager()
+        super().__init__()
 
     def get_klines(self) -> tuple[float, float]:
-        klines = gatekeeper.get_updated_klines()
-        current_kline = float(klines[0][4])
-        prev_kline = float(klines[1][4])
+        klines = gatekeeper.get_klines()
+        current_kline = float(klines[-1][4])
+        prev_kline = float(klines[-2][4])
         return current_kline, prev_kline
 
     def get_lines(self) -> tuple[list[float], list[float]]:
@@ -62,6 +61,6 @@ class BalanceTrigger(BotBase):
         super().__init__()
 
     def invalid_balance(self) -> bool:
-        balance = gatekeeper.get_updated_balance()["USDT"]
+        balance = gatekeeper.get_balance()["USDT"]
         if balance < self.amount_buy:
             return True

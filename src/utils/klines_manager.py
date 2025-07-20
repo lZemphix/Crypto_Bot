@@ -11,7 +11,7 @@ class KlinesManager:
 
     def get_klines_dataframe(self) -> pd.DataFrame:
         try:
-            klines = gatekeeper.get_updated_klines()
+            klines = gatekeeper.get_klines()
             dataframe = pd.DataFrame(klines)
             dataframe.columns = [
                 "time",
@@ -23,12 +23,11 @@ class KlinesManager:
                 "turnover",
             ]
         except ValueError as e:
-            logger.error(e)
+            logger.error("Returned empty dataframe. Message: %s", e)
             return pd.DataFrame()
         dataframe.set_index("time", inplace=True)
         dataframe.index = pd.to_numeric(dataframe.index, downcast="integer").astype(
             "datetime64[ms]"
         )
-        dataframe = dataframe[::-1]
         dataframe["close"] = pd.to_numeric(dataframe["close"])
         return dataframe
