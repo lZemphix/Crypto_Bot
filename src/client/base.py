@@ -1,5 +1,4 @@
 from config.config import get_bot_config, get_env_config
-from utils.states import BuyState
 from utils.telenotify import Telenotify
 from pybit.unified_trading import HTTP
 from logging import getLogger
@@ -29,7 +28,7 @@ class BotBase:
 
         self.symbol: str = get_bot_config("symbol")
         self.coin_name: str = self.symbol.replace("USDT", "")
-        self.interval: str = get_bot_config("interval")
+        self.interval: int = get_bot_config("interval")
         self.amount_buy: float = get_bot_config("amountBuy")
         self.stepBuy: float = get_bot_config("stepBuy")
         self.stepSell: float = get_bot_config("stepSell")
