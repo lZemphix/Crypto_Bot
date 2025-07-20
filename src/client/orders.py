@@ -1,7 +1,7 @@
 import json
 from logging import getLogger
 from client.base import Client
-from client.account import account
+from utils.gatekeeper import gatekeeper
 from config.config import get_bot_config
 from utils.exceptions import (
     IncorrectOpenOrdersList,
@@ -74,7 +74,7 @@ class Orders(Checkup):
         """Places sell order"""
         try:
             coin_name = self.symbol.replace("USDT", "")
-            amount = f"{account.get_balance().get(coin_name):.10f}"[
+            amount = f"{gatekeeper.get_balance().get(coin_name):.10f}"[
                 : self.get_accuracy()
             ]
             logger.info(f"{amount=}")
