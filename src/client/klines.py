@@ -7,7 +7,6 @@ logger = getLogger(__name__)
 class Klines(Client):
 
     def __init__(self) -> None:
-        self.cnt = 0
         super().__init__()
 
     def get_klines(self, limit: int = 200) -> dict:
@@ -18,10 +17,9 @@ class Klines(Client):
                 limit=limit,
                 category="spot",
             )
-            self.cnt += 1
-            logger.debug(f"Klines req #{self.cnt}")
             return kline["result"]["list"]
-        except:
+        except Exception as e:
+            logger.warning('Getting klines error! Message: %s', e)
             return None
 
 
