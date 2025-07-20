@@ -3,9 +3,7 @@ from utils.lines_manager import LinesManager
 from utils.states import BuyState
 from client.base import BotBase
 from client.orders import Orders
-from client.klines import Klines
-from utils.telenotify import Telenotify
-from utils.triggers import BalanceTrigger, IndicatorTrigger
+from utils.triggers import IndicatorTrigger
 from logging import getLogger
 from data.consts import FIRST_BUY_MESSAGE
 from utils.gatekeeper import gatekeeper
@@ -29,21 +27,15 @@ class Checkup(BotBase):
         self.journal.update(data)
 
     def valid_balance(self) -> None:
-        return gatekeeper.get_updated_balance()["USDT"] > self.amount_buy
+        return gatekeeper.get_balance()["USDT"] > self.amount_buy
 
 
-class FirstBuy(Checkup):
-
+class Notifier(Checkup):
     def __init__(self):
         super().__init__()
-        self.orders = Orders()
-        self.klines = Klines()
-        self.trigger = IndicatorTrigger()
-        self.current_state = BuyState.WAITING
-        self.lines = LinesManager()
 
     def send_notify(self, last_order: float) -> None:
-        balance = gatekeeper.get_updated_balance()["USDT"]
+        balance = gatekeeper.get_balance()["USDT"]
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
 
@@ -60,43 +52,53 @@ class FirstBuy(Checkup):
         )
 
     def nem_notify(self) -> None:
-        usdt_balance = round(gatekeeper.get_updated_balance()["USDT"], 3)
+        usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
         amount_buy = self.amount_buy
         self.telenotify.warning(
             f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```"
         )
 
+
+class FirstBuy(Checkup):
+
+
+    def __init__(self):
+        super().__init__()
+        self.orders = Orders()
+        self.trigger = IndicatorTrigger()
+        self.current_state = BuyState.WAITING
+        self.lines = LinesManager()
+
+
     def activate(self) -> bool:
-        logger.info("FirstBuy activation started")
-        while self.current_state != BuyState.STOPPED:
-            logger.debug(f"Current state: {self.current_state}")
-            if self.current_state == BuyState.PRICE_CORRECT:
-                logger.info("State: PRICE_CORRECT")
-                if self.orders.place_buy_order():
-                    logger.info("Buy order placed successfully")
-                    time.sleep(2)
-                    last_order = float(
-                        self.orders.get_order_history()[0].get("avgPrice")
-                    )
-                    logger.debug(f"Last order price: {last_order}")
-                    if self.lines.write_lines(last_order):
-                        logger.info("Lines written successfully")
-                        self.send_notify(last_order)
-                        logger.info("Notification sent for first buy")
-                        self.update_journal(last_order)
-                        logger.info("Journal updated with new order")
-                        self.current_state = BuyState.STOPPED
-                        return True
+        logger.info("Trying to do first buy")
+        if self.current_state == BuyState.PRICE_CORRECT:
+            logger.debug("State: PRICE_CORRECT")
+            if self.orders.place_buy_order():
+                logger.info("Buy order placed successfully")
+                time.sleep(2)
+                last_order = float(self.orders.get_order_history()[0].get("avgPrice"))
+                logger.debug(f"Last order price: {last_order}")
+                if self.lines.write_lines(last_order):
+                    logger.debug("Lines written successfully")
+                    Notifier().send_notify(last_order)
+                    logger.debug("Notification sent for first buy")
+                    self.update_journal(last_order)
+                    logger.debug("Journal updated with new order")
+                    self.current_state = BuyState.STOPPED
+                    return True
 
-            if (
-                self.trigger.rsi_trigger()
-                and self.current_state == BuyState.BALANCE_CORRECT
-            ):
-                logger.info("RSI trigger activated, switching to PRICE_CORRECT state")
-                self.current_state = BuyState.PRICE_CORRECT
-                logger.info("State now: %s", self.current_state)
+        if (
+            self.trigger.rsi_trigger() and 
+            self.current_state == BuyState.BALANCE_CORRECT
+        ):
+            logger.debug("RSI trigger activated, switching to PRICE_CORRECT state")
+            self.current_state = BuyState.PRICE_CORRECT
+            logger.debug("State now: %s", self.current_state)
 
-            if self.valid_balance() and self.current_state == BuyState.WAITING:
-                logger.info("Balance valid, switching to BALANCE_CORRECT state")
-                self.current_state = BuyState.BALANCE_CORRECT
-                logger.info("State now: %s", self.current_state)
+        if (self.valid_balance() and 
+            self.current_state == BuyState.WAITING
+        ):
+            logger.debug("Balance valid, switching to BALANCE_CORRECT state")
+            self.current_state = BuyState.BALANCE_CORRECT
+            logger.debug("State now: %s", self.current_state)
