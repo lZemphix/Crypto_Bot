@@ -17,9 +17,7 @@ class Checkup(BotBase):
 
     def __init__(self) -> None:
         super().__init__()
-        self.journal = JournalManager()
         self.trigger = CrossKlinesTrigger()
-
 
     def valid_balance(self):
         usdt_balance = gatekeeper.get_balance()["USDT"]
@@ -33,7 +31,6 @@ class Checkup(BotBase):
         price_lower_than_step = step_buy < (avg_order - actual_price)
         return actual_price < avg_order and price_lower_than_step
 
-
     def update_journal(self, last_order: float):
         data = self.journal.get()
         orders = data["orders"]
@@ -41,6 +38,7 @@ class Checkup(BotBase):
         data["orders"] = orders
         self.journal.update(data)
         return True
+
 
 class Notifier(Checkup):
     def __init__(self):
@@ -56,6 +54,7 @@ class Notifier(Checkup):
         self.telenotify.bought(
             f'```\nAvergaging price: {last_order} USDT\nBalance: {balance["USDT"]}\nSell line: ${min_sell_price}\nAverage line: ${min_buy_price}```'
         )
+
 
 class Averaging(Checkup):
 
