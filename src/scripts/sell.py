@@ -16,16 +16,8 @@ class Checkup(BotBase):
         self.orders = Orders()
 
     def price_valid(self):
-        actual_price = gatekeeper.get_kline()
+        actual_price = float(gatekeeper.get_klines()[-1][4])
         sell_price = self.orders.get_avg_order() + self.stepSell
-        try:
-            if actual_price != None:
-                if isinstance(actual_price, list):
-                    actual_price = float(actual_price[0][4])
-            else:
-                actual_price = 0
-        except:
-            pass
         logger.debug(actual_price)
         return actual_price >= sell_price
 
@@ -34,7 +26,6 @@ class Notifier(Checkup):
 
     def __init__(self):
         super().__init__()
-
 
     def send_buy_notify(self):
         last_order = self.orders.get_order_history()[0]
