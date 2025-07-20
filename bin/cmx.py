@@ -13,15 +13,21 @@ def clear():
     with open("src/data/trade_journal.json", "r") as f:
         j = json.load(f)
 
-    default_journal = {
-        "laps": j["laps"],
+    default_trade_journal = {
+        "laps": 0,
         "orders": [],
         "buy_lines": [],
         "sell_lines": [],
     }
-
+    default_gatekeeper_journal = {
+        "balance": {},
+        "klines": []
+    }
     with open("src/data/trade_journal.json", "w") as f:
-        json.dump(default_journal, f, indent=4)
+        json.dump(default_trade_journal, f, indent=4)
+
+    with open("src/data/gatekeeper_journal.json", "w") as f:
+        json.dump(default_gatekeeper_journal, f, indent=4)
 
 
 def change_config(param: str, new_value: str | int | bool):
@@ -143,7 +149,7 @@ def main():
 
         case "clear":
             clear()
-            print("Trade journal was returned to base state")
+            print("Trade and gatekeeper journals was returned to base state")
 
         case "start":
             os.system("python3 src/main.py")
