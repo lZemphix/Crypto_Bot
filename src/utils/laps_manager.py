@@ -5,17 +5,10 @@ from utils.gatekeeper import gatekeeper
 
 class LapsManager:
     def __init__(self):
-        super().__init__()
+        pass
 
-    def get(self) -> int:
-        temp = self.get_temp()
-        return temp.get("laps")
+    def get(self): ...
 
-    def clear(self) -> bool:
-        gatekeeper.update(laps=0)
-        return True
+    def update(self): ...
 
-    def add_one(self) -> bool:
-        laps = self.get()
-        gatekeeper.update(laps=laps + 1)
-        return True
+    def clear(self): ...
