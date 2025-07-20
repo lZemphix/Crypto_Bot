@@ -76,7 +76,7 @@ def settings():
             if new_value == "":
                 change_config("amountBuy", 5)
             elif int(new_value) < 5:
-                print("Aborting. Min. order price = 5!")
+                print("Aborting. Min. order price = 5.5!")
                 settings()
             else:
                 change_config("amountBuy", int(new_value))
@@ -121,7 +121,7 @@ def settings():
         case 7:
             change_config("symbol", "BTCUSDT")
             change_config("interval", 5)
-            change_config("amountBuy", 5)
+            change_config("amountBuy", 5.5)
             change_config("RSI", 41)
             change_config("stepBuy", 750)
             change_config("symbol", 650)
