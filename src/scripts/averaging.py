@@ -25,19 +25,19 @@ class Checkup(BotBase):
         return (sum(orders) / len(orders)) if len(orders) > 0 else 0
 
     def valid_balance(self):
-        usdt_balance = gatekeeper.get_updated_balance()["USDT"]
+        usdt_balance = gatekeeper.get_balance()["USDT"]
         amount_buy_price = get_bot_config("amountBuy")
         return usdt_balance > amount_buy_price
 
     def valid_price(self):
         avg_order = self.get_avg_order()
-        actual_price = float(gatekeeper.get_updated_klines()[0][4])
+        actual_price = float(gatekeeper.get_klines()[-1][4])
         step_buy = get_bot_config("stepBuy")
         price_lower_than_step = step_buy < (avg_order - actual_price)
         return actual_price < avg_order and price_lower_than_step
 
     def send_notify(self, last_order: float):
-        balance = gatekeeper.get_updated_balance()
+        balance = gatekeeper.get_balance()
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
         logger.info(
@@ -64,22 +64,22 @@ class Averaging(Checkup):
         self.lines = LinesManager()
 
     def activate(self):
-        logger.info("Averaging activation started")
+        logger.info("Trying to average")
         if self.valid_balance():
-            logger.info("valid_balance")
+            logger.debug("valid_balance")
             if self.valid_price():
-                logger.info("valid_price")
+                logger.debug("valid_price")
                 if self.trigger.cross_down_to_up():
-                    logger.info("Trigger cross_down_to_up activated")
+                    logger.debug("Trigger cross_down_to_up activated")
                     if get_orders.place_buy_order():
                         logger.info("Buy order placed successfully")
                         time.sleep(2)
                         last_order = get_orders.get_order_history()[0].get("avgPrice")
                         logger.debug(f"Last order price: {last_order}")
                         if self.update_journal(float(last_order)):
-                            logger.info("Journal updated with new order")
+                            logger.debug("Journal updated with new order")
                             if self.lines.write_lines(float(last_order)):
-                                logger.info("Lines written successfully")
+                                logger.debug("Lines written successfully")
                                 self.send_notify(last_order)
-                                logger.info("Notification sent for averaging")
+                                logger.debug("Notification sent for averaging")
                                 return True
