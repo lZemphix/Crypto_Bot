@@ -20,9 +20,6 @@ class Checkup(BotBase):
         self.journal = JournalManager()
         self.trigger = CrossKlinesTrigger()
 
-    def get_avg_order(self):
-        orders = self.journal.get()["orders"]
-        return (sum(orders) / len(orders)) if len(orders) > 0 else 0
 
     def valid_balance(self):
         usdt_balance = gatekeeper.get_balance()["USDT"]
@@ -30,22 +27,12 @@ class Checkup(BotBase):
         return usdt_balance > amount_buy_price
 
     def valid_price(self):
-        avg_order = self.get_avg_order()
+        avg_order = get_orders.get_avg_order()
         actual_price = float(gatekeeper.get_klines()[-1][4])
         step_buy = get_bot_config("stepBuy")
         price_lower_than_step = step_buy < (avg_order - actual_price)
         return actual_price < avg_order and price_lower_than_step
 
-    def send_notify(self, last_order: float):
-        balance = gatekeeper.get_balance()
-        min_sell_price = self.journal.get()["sell_lines"][0]
-        min_buy_price = self.journal.get()["buy_lines"][0]
-        logger.info(
-            f'Avergaging for ${last_order}. Balance: {balance["USDT"]}. Min price for sell: ${min_sell_price}. Min price for averate: ${min_buy_price}'
-        )
-        self.telenotify.bought(
-            f'```\nAvergaging price: {last_order} USDT\nBalance: {balance["USDT"]}\nSell line: ${min_sell_price}\nAverage line: ${min_buy_price}```'
-        )
 
     def update_journal(self, last_order: float):
         data = self.journal.get()
@@ -55,6 +42,20 @@ class Checkup(BotBase):
         self.journal.update(data)
         return True
 
+class Notifier(Checkup):
+    def __init__(self):
+        super().__init__()
+
+    def send_averaging_notify(self, last_order: float):
+        balance = gatekeeper.get_balance()
+        min_sell_price = self.journal.get()["sell_lines"][0]
+        min_buy_price = self.journal.get()["buy_lines"][0]
+        logger.info(
+            f'Avergaging for ${last_order}. Balance: {balance["USDT"]}. Min price for sell: ${min_sell_price}. Min price for averate: ${min_buy_price}'
+        )
+        self.telenotify.bought(
+            f'```\nAvergaging price: {last_order} USDT\nBalance: {balance["USDT"]}\nSell line: ${min_sell_price}\nAverage line: ${min_buy_price}```'
+        )
 
 class Averaging(Checkup):
 
@@ -80,6 +81,6 @@ class Averaging(Checkup):
                             logger.debug("Journal updated with new order")
                             if self.lines.write_lines(float(last_order)):
                                 logger.debug("Lines written successfully")
-                                self.send_notify(last_order)
+                                Notifier().send_averaging_notify(last_order)
                                 logger.debug("Notification sent for averaging")
                                 return True

@@ -34,7 +34,7 @@ class Notifier(Checkup):
     def __init__(self):
         super().__init__()
 
-    def send_notify(self, last_order: float) -> None:
+    def send_buy_notify(self, last_order: float) -> None:
         balance = gatekeeper.get_balance()["USDT"]
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
@@ -51,7 +51,7 @@ class Notifier(Checkup):
             )
         )
 
-    def nem_notify(self) -> None:
+    def send_nem_notify(self) -> None:
         usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
         amount_buy = self.amount_buy
         self.telenotify.warning(
@@ -81,7 +81,7 @@ class FirstBuy(Checkup):
                 logger.debug(f"Last order price: {last_order}")
                 if self.lines.write_lines(last_order):
                     logger.debug("Lines written successfully")
-                    Notifier().send_notify(last_order)
+                    Notifier().send_buy_notify(last_order)
                     logger.debug("Notification sent for first buy")
                     self.update_journal(last_order)
                     logger.debug("Journal updated with new order")

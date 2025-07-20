@@ -4,8 +4,6 @@ from client.base import BotBase
 from client.orders import Orders
 from utils.gatekeeper import gatekeeper
 from utils.journal_manager import JournalManager
-from utils.states import SellState
-from utils.telenotify import Telenotify
 from utils.triggers import CrossKlinesTrigger
 
 logger = getLogger(__name__)
@@ -18,7 +16,7 @@ class Checkup(BotBase):
         self.orders = Orders()
 
     def price_valid(self):
-        actual_price = gatekeeper.get_updated_klines()
+        actual_price = gatekeeper.get_kline()
         sell_price = self.orders.get_avg_order() + self.stepSell
         try:
             if actual_price != None:
@@ -31,7 +29,14 @@ class Checkup(BotBase):
         logger.debug(actual_price)
         return actual_price >= sell_price
 
-    def send_notify(self):
+
+class Notifier(Checkup):
+
+    def __init__(self):
+        super().__init__()
+
+
+    def send_buy_notify(self):
         last_order = self.orders.get_order_history()[0]
         last_order_price = float(last_order["avgPrice"])
         coin_qty = float(last_order["cumExecQty"])
@@ -46,18 +51,17 @@ class Sell(Checkup):
         super().__init__()
         self.journal = JournalManager()
         self.trigger = CrossKlinesTrigger()
-        self.current_state = SellState.WAITING
 
     def activate(self) -> bool:
-        logger.info("Sell activation started")
+        logger.info("Trying to close positions")
         if self.price_valid():
-            logger.info("Price valid for sell")
+            logger.debug("Price valid for sell")
             if self.trigger.cross_up_to_down():
-                logger.info("Trigger cross_up_to_down activated")
+                logger.debug("Trigger cross_up_to_down activated")
                 if self.orders.place_sell_order():
                     logger.info("Sell order placed successfully")
                     time.sleep(2)
-                    self.send_notify()
+                    Notifier().send_buy_notify()
                     logger.info("Notification sent for sell")
                     self.journal.clear()
                     logger.info("Journal cleared after sell")
