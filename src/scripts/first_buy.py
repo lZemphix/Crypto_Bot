@@ -1,13 +1,11 @@
 import time
 from utils.lines_manager import LinesManager
-from utils.states import BuyState
 from client.base import BotBase
 from client.orders import Orders
 from utils.triggers import IndicatorTrigger
 from logging import getLogger
 from data.consts import FIRST_BUY_MESSAGE
 from utils.gatekeeper import gatekeeper
-from utils.journal_manager import JournalManager
 
 
 logger = getLogger(__name__)
@@ -17,7 +15,6 @@ class Checkup(BotBase):
 
     def __init__(self):
         super().__init__()
-        self.journal = JournalManager()
 
     def update_journal(self, last_order: float) -> None:
         data = self.journal.get()
@@ -51,28 +48,19 @@ class Notifier(Checkup):
             )
         )
 
-    def send_nem_notify(self) -> None:
-        usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
-        amount_buy = self.amount_buy
-        self.telenotify.warning(
-            f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```"
-        )
 
 
 class FirstBuy(Checkup):
-
 
     def __init__(self):
         super().__init__()
         self.orders = Orders()
         self.trigger = IndicatorTrigger()
-        self.current_state = BuyState.WAITING
         self.lines = LinesManager()
-
 
     def activate(self) -> bool:
         logger.info("Trying to do first buy")
-        if self.current_state == BuyState.PRICE_CORRECT:
+        if self.trigger.rsi_trigger():
             logger.debug("State: PRICE_CORRECT")
             if self.orders.place_buy_order():
                 logger.info("Buy order placed successfully")
@@ -85,20 +73,4 @@ class FirstBuy(Checkup):
                     logger.debug("Notification sent for first buy")
                     self.update_journal(last_order)
                     logger.debug("Journal updated with new order")
-                    self.current_state = BuyState.STOPPED
                     return True
-
-        if (
-            self.trigger.rsi_trigger() and 
-            self.current_state == BuyState.BALANCE_CORRECT
-        ):
-            logger.debug("RSI trigger activated, switching to PRICE_CORRECT state")
-            self.current_state = BuyState.PRICE_CORRECT
-            logger.debug("State now: %s", self.current_state)
-
-        if (self.valid_balance() and 
-            self.current_state == BuyState.WAITING
-        ):
-            logger.debug("Balance valid, switching to BALANCE_CORRECT state")
-            self.current_state = BuyState.BALANCE_CORRECT
-            logger.debug("State now: %s", self.current_state)
