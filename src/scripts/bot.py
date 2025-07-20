@@ -1,15 +1,14 @@
 from logging import getLogger
 import time
-
 from scripts.averaging import Averaging
 from scripts.sell import Sell
-from utils.gatekeeper import gatekeeper
+from client.orders import get_orders
+from utils.gatekeeper import gatekeeper, gatekeeper_websocket
 from utils.journal_manager import JournalManager
 from utils.states import BotState
 from client.base import BotBase
 from scripts.first_buy import FirstBuy
 from utils.klines_manager import KlinesManager
-from utils.telenotify import Telenotify
 from data.consts import *
 from utils.triggers import BalanceTrigger
 
@@ -20,30 +19,31 @@ logger = getLogger(__name__)
 class Price(BotBase):
     def __init__(self):
         super().__init__()
-        self.journal = JournalManager()
 
-    def price_side(self):
-        orders = self.journal.get()["orders"]
-        avg_order = sum(orders) / (len(orders) if len(orders) != 0 else 1)
+    def get_price_side(self):
+        avg_order = get_orders.get_avg_order()
         try:
-            price = float(gatekeeper.get_updated_klines()[0][4])
+            price = float(gatekeeper.get_klines()[-1][4])
             return round(price - avg_order, 3)
         except TypeError:
             logger.warning("TypeError. Return 0")
             return 0
 
 
-class Notifications(BotBase):
+class Notifier(BotBase):
     def __init__(self):
         super().__init__()
-        self.journal = JournalManager()
 
-    def activate_message(self):
-        usdt_balance = round(gatekeeper.get_updated_balance()["USDT"], 3)
+    def send_activate_notify(self):
+        try:
+            usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
+        except KeyError:
+            gatekeeper_websocket.update_balance_journal()
+            usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
         interval = self.interval
         amount_buy = self.amount_buy
         try:
-            coin_balance = f"{gatekeeper.get_updated_balance()[self.coin_name]:.10f}"
+            coin_balance = f"{gatekeeper.get_balance()[self.coin_name]:.10f}"
         except:
             coin_balance = 0.00
         self.telenotify.bot_status(
@@ -57,8 +57,8 @@ class Notifications(BotBase):
             )
         )
 
-    def nem_notify(self):
-        usdt_balance = round(gatekeeper.get_updated_balance()["USDT"], 3)
+    def send_nem_notify(self):
+        usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
         amount_buy = self.amount_buy
         self.telenotify.warning(
             f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```"
@@ -68,62 +68,84 @@ class Notifications(BotBase):
         )
 
 
+class States(BotBase):
+
+    def __init__(self):
+        super().__init__()
+        self.balance_trigger = BalanceTrigger()
+        self.first_buy = FirstBuy()
+        self.averaging = Averaging()
+        self.sell = Sell()
+
+    def insufficient_balance_state(self):
+        Notifier().send_nem_notify()
+        logger.debug("Not enough money for buying, trying to sell")
+        while self.balance_trigger.invalid_balance():
+            if self.sell.activate():
+                logger.debug("Switching to FIRST_BUY state")
+                return BotState.FIRST_BUY
+
+    def waiting_state(self):
+        logger.debug("State: WAITING")
+        if len(self.journal.get()["orders"]) == 0:
+            logger.debug("No orders. Switching to FIRST_BUY state")
+            return BotState.FIRST_BUY
+        elif Price().get_price_side() > 0:
+            logger.debug("Coin price > 0. Switching to SELL state")
+            return BotState.SELL
+        else:
+            logger.debug("Coin price < 0. Switching to AVERAGING state")
+            return BotState.AVERAGING
+
+    def averaging_state(self):
+        if self.averaging.activate():
+            logger.info("Averaged. Switching to WAITING state")
+        else:
+            logger.info("Not averaged. Switching to WAITING state")
+        return BotState.WAITING
+
+    def sell_state(self):
+        if self.sell.activate():
+            logger.info("Sold. Switching to FIRST_BUY state")
+            return BotState.FIRST_BUY
+        else:
+            logger.info("Not sold. Switching to WAITING state")
+            return BotState.WAITING
+
+    def first_buy_state(self):
+        if self.first_buy.activate():
+            logger.info("Bought. Switching to WAITING state")
+            return BotState.WAITING
+        return BotState.FIRST_BUY
+
+
 class Bot(BotBase):
 
     def __init__(self):
         super().__init__()
-        self.current_state = BotState.WAITING
-        self.klines = KlinesManager()
-        self.journal = JournalManager()
         self.balance_trigger = BalanceTrigger()
 
     def activate(self):
-        logger.info("Bot activation started")
-        Notifications().activate_message()
-        while self.current_state != BotState.STOPPED:
+        print("start")
+        current_state = BotState.WAITING
+        logger.info("Bot was activated!")
+        Notifier().send_activate_notify()
+        gatekeeper_websocket
+        while True:
             time.sleep(0.5)
-            logger.debug(f"Current state: {self.current_state}")
+            logger.debug(f"Current state: {current_state}")
+
             if self.balance_trigger.invalid_balance():
-                self.nem_notify()
-                logger.info("State: sell")
-                while self.balance_trigger.invalid_balance():
-                    logger.debug("Not enough money for buying, switching to SELL state")
-                    self.current_state = BotState.SELL
-                    if Sell().activate():
-                        logger.info("Sold successful, switching to FIRST_BUY state")
-                        self.current_state = BotState.FIRST_BUY
+                current_state = States().insufficient_balance_state()
 
-            if self.current_state == BotState.WAITING:
-                logger.debug("State: WAITING")
-                if len(self.journal.get()["orders"]) == 0:
-                    logger.info("No orders, setting FIRST_BUY state")
-                    self.current_state = BotState.FIRST_BUY
-                elif Price().price_side() > 0:
-                    logger.info("Coin price > 0. Switching to SELL state")
-                    self.current_state = BotState.SELL
-                else:
-                    logger.info("Coin price < 0. Switching to AVERAGING state")
-                    self.current_state = BotState.AVERAGING
+            if current_state == BotState.WAITING:
+                current_state = States().waiting_state()
 
-            if self.current_state == BotState.AVERAGING:
-                if Averaging().activate():
-                    logger.info("Averaging activated, switching to WAITING state")
-                    self.current_state = BotState.WAITING
-                else:
-                    logger.info("Averaging not activated, staying in WAITING state")
-                    self.current_state = BotState.WAITING
+            if current_state == BotState.AVERAGING:
+                current_state = States().averaging_state()
 
-            if self.current_state == BotState.SELL:
-                logger.info("State: SELL")
-                if Sell().activate():
-                    logger.info("Sell activated, switching to FIRST_BUY state")
-                    self.current_state = BotState.FIRST_BUY
-                else:
-                    logger.info("Sell not activated, switching to WAITING state")
-                    self.current_state = BotState.WAITING
+            if current_state == BotState.SELL:
+                current_state = States().sell_state()
 
-            if self.current_state == BotState.FIRST_BUY:
-                logger.info("State: FIRST_BUY")
-                if FirstBuy().activate():
-                    logger.info("Bought, switching to WAITING state")
-                    self.current_state = BotState.WAITING
+            if current_state == BotState.FIRST_BUY:
+                current_state = States().first_buy_state()
