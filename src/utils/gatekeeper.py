@@ -1,6 +1,6 @@
 import json
 import time
-from pybit.unified_trading import WebSocket, HTTP
+from pybit.unified_trading import WebSocket
 from client.base import Client
 from client.klines import get_klines
 from logging import getLogger
@@ -38,29 +38,72 @@ class Formater:
 
 
 
-class GatekeeperInterface:
+class GatekeeperStorage(Client):
 
     def __init__(self):
         super().__init__()
-        self.path = "src/data/gatekeeper_journal.json"
+        self.storage: dict = {"balance": {}, "klines": []}
 
     def get(self) -> dict[dict[float], dict[float]]:
-        with open(self.path) as f:
-            return json.load(f)
+        return self.storage
 
     def get_balance(self) -> dict[float]:
-        return self.get()["balance"]
+        return self.storage.get("balance")
 
     def get_klines(self) -> dict[float]:
-        return self.get()["klines"]
+        return self.storage.get("klines")
+    
+    def update(self, target: str, data: list | dict):
+        try:
+            self.storage[target] = data
+            return True
+        except Exception as e:
+            logger.error(e)
+    
+    def __init_update(self, target: str):
+        try:
+            if target.lower() == 'klines':
+                updating_value = get_klines.get_klines()[::-1] 
+
+            elif target.lower() == 'balance':
+                balance = self.client.get_wallet_balance(accountType=self.ACCOUNT_TYPE)
+                updating_value = Formater().format_balance(balance, 'init')
+            else:
+                raise ValueError('Expecting "klines" or "balance" in the target value')
+            self.update(target, updating_value)
+        except Exception as e:
+            logger.error(e)
+
+    
+    def update_balance(self):
+        try:
+            self.__init_update('balance')
+            logger.debug("Balance part in the journal was updated")
+            return True
+        except Exception as e:
+            logger.error(e)
 
 
-class GatekeeperWebsocket(GatekeeperInterface, Client):
+    def update_klines(self):
+        try:
+            self.__init_update('klines')
+            logger.debug("Klines part in the journal was updated")
+            return True
+        except Exception as e:
+            logger.error(e)
+
+
+
+gatekeeper_storage = GatekeeperStorage()
+
+class Gatekeeper(Client):
 
     def __init__(self):
         super().__init__()
-        self.path = "src/data/gatekeeper_journal.json"
-        self.ws = WebSocket(channel_type="spot", testnet=False)
+        self.ws = WebSocket(
+            channel_type="spot", 
+            testnet=False
+        )
         self.wallet_ws = WebSocket(
             channel_type="private",
             testnet=False,
@@ -70,78 +113,30 @@ class GatekeeperWebsocket(GatekeeperInterface, Client):
         self.ws.kline_stream(
             interval=5, symbol="BTCUSDT", callback=self.klines_callback
         )
-        self.wallet_ws.wallet_stream(callback=self.wallet_callback)
-        
-
-    def get(self):
-        with open(self.path) as f:
-            return json.load(f)
-
-    def get_balance(self):
-        return self.get()["balance"]
-
-    def get_klines(self):
-        return self.get()["klines"]
-    
-    def __update(self, target: str):
-        try:
-            journal = self.get()
-
-            if target.lower() == 'klines':
-                updating_value = get_klines.get_klines()[::-1] 
-
-            elif target.lower() == 'balance':
-                updating_value = Formater().format_balance(self.client.get_wallet_balance(accountType=self.ACCOUNT_TYPE), 'init')
-            else:
-                raise ValueError('Expecting "klines" or "balance" in the target value')
-            journal[target] = updating_value
-            with open(self.path, 'w') as f:
-                json.dump(journal, f, indent=4)
-        except Exception as e:
-            logger.error(e)
-
-    
-    def update_balance_journal(self):
-        try:
-            self.__update('balance')
-            logger.debug("Balance part in the journal was updated")
-        except Exception as e:
-            logger.error(e)
-
-
-    def update_klines_journal(self):
-        try:
-            self.__update('klines')
-            logger.debug("Klines part in the journal was updated")
-        except Exception as e:
-            logger.error(e)
+        self.wallet_ws.wallet_stream(
+            callback=self.wallet_callback
+        )
 
 
     def klines_callback(self, kline: dict):
-        journal = self.get()
+        storage = gatekeeper_storage.get()
         new_kline = list(Formater().format_new_kline(kline).values())
 
-        if len(journal['klines']) == 0 or new_kline[-1] == True:
-            self.update_klines_journal()
+        if len(storage['klines']) == 0 or new_kline[-1] == True:
+            gatekeeper_storage.update_klines()
             return
-        if len(journal['balance']) == 0:
-            self.update_balance_journal()
+        if len(storage['balance']) == 0:
+            gatekeeper_storage.update_balance()
             return
         
-        journal["klines"].pop()
-        journal["klines"].append(new_kline[:-1])
-        with open(self.path, "w") as f:
-            json.dump(journal, f, indent=4)
-            logger.debug("Last kline was updated")
+        klines_list = storage["klines"]
+        klines_list.pop()
+        klines_list.append(new_kline[:-1])
+        gatekeeper_storage.update('klines', klines_list)
+        logger.debug("Last kline was updated")
+            
 
     def wallet_callback(self, balance):
-        journal = self.get()
         formated_balance = Formater().format_balance(balance)
-        journal["balance"] = formated_balance
-        with open(self.path, "w") as f:
-            json.dump(journal, f, indent=4)
+        gatekeeper_storage.update(balance, formated_balance)
         logger.debug("Wallet change detected! Updating journal!")
-
-
-gatekeeper = GatekeeperInterface()
-gatekeeper_websocket = GatekeeperWebsocket()
