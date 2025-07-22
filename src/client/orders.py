@@ -1,7 +1,7 @@
 import json
 from logging import getLogger
 from client.base import Client
-from utils.gatekeeper import gatekeeper
+from utils.gatekeeper import gatekeeper_storage
 from config.config import get_bot_config
 from utils.exceptions import (
     IncorrectOpenOrdersList,
@@ -74,7 +74,7 @@ class Orders(Checkup):
         """Places sell order"""
         try:
             coin_name = self.symbol.replace("USDT", "")
-            amount = f"{gatekeeper.get_balance().get(coin_name):.10f}"[
+            amount = f"{gatekeeper_storage.get_balance().get(coin_name):.10f}"[
                 : self.get_accuracy()
             ]
             logger.info(f"{amount=}")
@@ -90,7 +90,7 @@ class Orders(Checkup):
             logger.error(e)
             raise OrderPlaceException(f"Message: {e}")
 
-    def get_avg_order(self) -> int:
+    def get_avg_order(self) -> float:
         orders = self.journal.get()["orders"]
         return (sum(orders) / len(orders)) if len(orders) > 0 else 0
 

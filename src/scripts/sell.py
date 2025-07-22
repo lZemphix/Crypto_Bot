@@ -2,7 +2,7 @@ from logging import getLogger
 import time
 from client.base import BotBase
 from client.orders import Orders
-from utils.gatekeeper import gatekeeper
+from utils.gatekeeper import gatekeeper_storage
 from utils.journal_manager import JournalManager
 from utils.triggers import CrossKlinesTrigger
 
@@ -16,9 +16,9 @@ class Checkup(BotBase):
         self.orders = Orders()
 
     def price_valid(self):
-        actual_price = float(gatekeeper.get_klines()[-1][4])
+        actual_price = float(gatekeeper_storage.get_klines()[-2][4])
         sell_price = self.orders.get_avg_order() + self.stepSell
-        logger.debug(actual_price)
+        logger.debug(f'{actual_price=}, {sell_price=}')
         return actual_price >= sell_price
 
 

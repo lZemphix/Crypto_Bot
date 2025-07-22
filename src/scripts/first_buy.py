@@ -5,7 +5,7 @@ from client.orders import Orders
 from utils.triggers import IndicatorTrigger
 from logging import getLogger
 from data.consts import FIRST_BUY_MESSAGE
-from utils.gatekeeper import gatekeeper
+from utils.gatekeeper import gatekeeper_storage
 
 
 logger = getLogger(__name__)
@@ -24,7 +24,7 @@ class Checkup(BotBase):
         self.journal.update(data)
 
     def valid_balance(self) -> None:
-        return gatekeeper.get_balance()["USDT"] > self.amount_buy
+        return gatekeeper_storage.get_balance()["USDT"] > self.amount_buy
 
 
 class Notifier(Checkup):
@@ -32,7 +32,7 @@ class Notifier(Checkup):
         super().__init__()
 
     def send_buy_notify(self, last_order: float) -> None:
-        balance = gatekeeper.get_balance()["USDT"]
+        balance = gatekeeper_storage.get_balance()["USDT"]
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
 

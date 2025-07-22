@@ -1,5 +1,5 @@
 from logging import getLogger
-from utils.gatekeeper import gatekeeper
+from utils.gatekeeper import gatekeeper_storage
 from client.base import BotBase
 from utils.klines_manager import KlinesManager
 import ta.momentum
@@ -29,7 +29,7 @@ class CrossKlinesTrigger(BotBase):
         super().__init__()
 
     def get_klines(self) -> tuple[float, float]:
-        klines = gatekeeper.get_klines()
+        klines = gatekeeper_storage.get_klines()
         current_kline = float(klines[-1][4])
         prev_kline = float(klines[-2][4])
         return current_kline, prev_kline
@@ -41,6 +41,8 @@ class CrossKlinesTrigger(BotBase):
 
     def cross_down_to_up(self) -> bool:  # Покупка
         current_kline, prev_kline = self.get_klines()
+        logger.debug(f'{current_kline=}')
+        logger.debug(f'{prev_kline=}')
         buy_lines: list[float] = self.get_lines()[0]
         for buy_line in buy_lines[::-1]:
             if prev_kline < buy_line <= current_kline:
@@ -61,6 +63,6 @@ class BalanceTrigger(BotBase):
         super().__init__()
 
     def invalid_balance(self) -> bool:
-        balance = gatekeeper.get_balance()["USDT"]
+        balance = gatekeeper_storage.get_balance()["USDT"]
         if balance < self.amount_buy:
             return True

@@ -4,7 +4,7 @@ from client.orders import get_orders
 from logging import getLogger
 
 from config.config import get_bot_config
-from utils.gatekeeper import gatekeeper
+from utils.gatekeeper import gatekeeper_storage
 from utils.journal_manager import JournalManager
 from utils.lines_manager import LinesManager
 from utils.states import BuyState
@@ -20,15 +20,18 @@ class Checkup(BotBase):
         self.trigger = CrossKlinesTrigger()
 
     def valid_balance(self):
-        usdt_balance = gatekeeper.get_balance()["USDT"]
+        usdt_balance = gatekeeper_storage.get_balance()["USDT"]
         amount_buy_price = get_bot_config("amountBuy")
         return usdt_balance > amount_buy_price
 
     def valid_price(self):
         avg_order = get_orders.get_avg_order()
-        actual_price = float(gatekeeper.get_klines()[-1][4])
+        logger.debug(f'{avg_order=}')
+        actual_price = float(gatekeeper_storage.get_klines()[-2][4])
+        logger.debug(f'{actual_price=}')
         step_buy = get_bot_config("stepBuy")
         price_lower_than_step = step_buy < (avg_order - actual_price)
+        logger.debug(f'{price_lower_than_step=}')
         return actual_price < avg_order and price_lower_than_step
 
     def update_journal(self, last_order: float):
@@ -45,7 +48,7 @@ class Notifier(Checkup):
         super().__init__()
 
     def send_averaging_notify(self, last_order: float):
-        balance = gatekeeper.get_balance()
+        balance = gatekeeper_storage.get_balance()
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
         logger.info(

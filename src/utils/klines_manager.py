@@ -1,6 +1,6 @@
 from logging import getLogger
 import pandas as pd
-from utils.gatekeeper import gatekeeper
+from utils.gatekeeper import gatekeeper_storage
 
 logger = getLogger(__name__)
 
@@ -11,7 +11,7 @@ class KlinesManager:
 
     def get_klines_dataframe(self) -> pd.DataFrame:
         try:
-            klines = gatekeeper.get_klines()
+            klines = gatekeeper_storage.get_klines()
             dataframe = pd.DataFrame(klines)
             dataframe.columns = [
                 "time",
