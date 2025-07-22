@@ -3,18 +3,24 @@ import time
 from scripts.averaging import Averaging
 from scripts.sell import Sell
 from client.orders import get_orders
-from utils.gatekeeper import gatekeeper, gatekeeper_websocket
-from utils.journal_manager import JournalManager
+from utils.gatekeeper import gatekeeper_storage, Gatekeeper
 from utils.states import BotState
 from client.base import BotBase
 from scripts.first_buy import FirstBuy
-from utils.klines_manager import KlinesManager
 from data.consts import *
 from utils.triggers import BalanceTrigger
 
 
 logger = getLogger(__name__)
 
+
+def initial_update():
+    try:
+        if gatekeeper_storage.update_balance():
+            if gatekeeper_storage.update_klines():
+                return True
+    except Exception as e:
+        logger.error(e)
 
 class Price(BotBase):
     def __init__(self):
@@ -23,7 +29,7 @@ class Price(BotBase):
     def get_price_side(self):
         avg_order = get_orders.get_avg_order()
         try:
-            price = float(gatekeeper.get_klines()[-1][4])
+            price = float(gatekeeper_storage.get_klines()[-1][4])
             return round(price - avg_order, 3)
         except TypeError:
             logger.warning("TypeError. Return 0")
@@ -35,15 +41,11 @@ class Notifier(BotBase):
         super().__init__()
 
     def send_activate_notify(self):
-        try:
-            usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
-        except KeyError:
-            gatekeeper_websocket.update_balance_journal()
-            usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
+        usdt_balance = round(gatekeeper_storage.get_balance()["USDT"], 3)
         interval = self.interval
         amount_buy = self.amount_buy
         try:
-            coin_balance = f"{gatekeeper.get_balance()[self.coin_name]:.10f}"
+            coin_balance = f"{gatekeeper_storage.get_balance()[self.coin_name]:.10f}"
         except:
             coin_balance = 0.00
         self.telenotify.bot_status(
@@ -58,7 +60,7 @@ class Notifier(BotBase):
         )
 
     def send_nem_notify(self):
-        usdt_balance = round(gatekeeper.get_balance()["USDT"], 3)
+        usdt_balance = round(gatekeeper_storage.get_balance()["USDT"], 3)
         amount_buy = self.amount_buy
         self.telenotify.warning(
             f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```"
@@ -126,13 +128,14 @@ class Bot(BotBase):
         self.balance_trigger = BalanceTrigger()
 
     def activate(self):
-        print("start")
+        Gatekeeper()
+        if not initial_update():
+            raise SystemExit('Can\'t do initial update')
         current_state = BotState.WAITING
         logger.info("Bot was activated!")
         Notifier().send_activate_notify()
-        gatekeeper_websocket
         while True:
-            time.sleep(0.5)
+            time.sleep(1)
             logger.debug(f"Current state: {current_state}")
 
             if self.balance_trigger.invalid_balance():
