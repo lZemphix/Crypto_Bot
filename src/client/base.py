@@ -11,12 +11,12 @@ class Client:
 
     def __init__(self) -> None:
         super().__init__()
-        self.API_KEY = get_env_config("API_KEY")
-        self.API_KEY_SECRET = get_env_config("API_KEY_SECRET")
-        self.ACCOUNT_TYPE = get_env_config("ACCOUNT_TYPE")
-        self.symbol = get_bot_config("symbol")
-        self.amount_buy = get_bot_config("amountBuy")
-        self.interval = get_bot_config("interval")
+        self.API_KEY: str = get_env_config("API_KEY")
+        self.API_KEY_SECRET: str = get_env_config("API_KEY_SECRET")
+        self.ACCOUNT_TYPE: str = get_env_config("ACCOUNT_TYPE")
+        self.symbol: str = get_bot_config("symbol")
+        self.amount_buy: int = get_bot_config("amountBuy")
+        self.interval: int = get_bot_config("interval")
         self.client = HTTP(
             testnet=False,
             api_key=self.API_KEY,
