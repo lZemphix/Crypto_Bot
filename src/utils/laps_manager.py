@@ -1,6 +1,4 @@
-from utils.gatekeeper import gatekeeper
-
-# DONT USED
+# DONT USING
 
 
 class LapsManager:
