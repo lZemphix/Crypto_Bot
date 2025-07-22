@@ -1,9 +1,10 @@
 services:
   bot:
     container_name: cmx_bot
+    restart: unless-stopped
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile  
     environment:
       ACCOUNT_TYPE: ${ACCOUNT_TYPE}
       API_KEY_SECRET: ${API_KEY_SECRET}
