@@ -111,7 +111,7 @@ class Gatekeeper(Client):
             api_secret=self.API_KEY_SECRET,
         )
         self.ws.kline_stream(
-            interval=5, symbol="BTCUSDT", callback=self.klines_callback
+            interval=self.interval, symbol=self.symbol, callback=self.klines_callback
         )
         self.wallet_ws.wallet_stream(
             callback=self.wallet_callback
