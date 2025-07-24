@@ -61,12 +61,11 @@ class Notifier(BotBase):
 
     def send_nem_notify(self):
         usdt_balance = round(gatekeeper_storage.get_balance()["USDT"], 3)
-        amount_buy = self.amount_buy
         self.telenotify.warning(
-            f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {amount_buy}```"
+            f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {self.amount_buy}```"
         )
         logger.warning(
-            f"Not enough money! Balance: {usdt_balance}. Min order price: {amount_buy}"
+            f"Not enough money! Balance: {usdt_balance}. Min order price: {self.amount_buy}"
         )
 
 
@@ -102,6 +101,7 @@ class States(BotBase):
     def averaging_state(self):
         if self.averaging.activate():
             logger.info("Averaged. Switching to WAITING state")
+            gatekeeper_storage.update_balance()
         else:
             logger.info("Not averaged. Switching to WAITING state")
         return BotState.WAITING
@@ -109,6 +109,7 @@ class States(BotBase):
     def sell_state(self):
         if self.sell.activate():
             logger.info("Sold. Switching to FIRST_BUY state")
+            gatekeeper_storage.update_balance()
             return BotState.FIRST_BUY
         else:
             logger.info("Not sold. Switching to WAITING state")
@@ -117,6 +118,7 @@ class States(BotBase):
     def first_buy_state(self):
         if self.first_buy.activate():
             logger.info("Bought. Switching to WAITING state")
+            gatekeeper_storage.update_balance()
             return BotState.WAITING
         return BotState.FIRST_BUY
 
@@ -125,7 +127,6 @@ class Bot(BotBase):
 
     def __init__(self):
         super().__init__()
-        self.balance_trigger = BalanceTrigger()
 
     def activate(self):
         Gatekeeper()
@@ -138,7 +139,7 @@ class Bot(BotBase):
             time.sleep(1)
             logger.debug(f"Current state: {current_state}")
 
-            if self.balance_trigger.invalid_balance():
+            if BalanceTrigger().invalid_balance():
                 current_state = States().insufficient_balance_state()
 
             if current_state == BotState.WAITING:
