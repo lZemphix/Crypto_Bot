@@ -63,6 +63,8 @@ class BalanceTrigger(BotBase):
         super().__init__()
 
     def invalid_balance(self) -> bool:
+        logger.debug("checking balance")
         balance = gatekeeper_storage.get_balance()["USDT"]
+        logger.debug(f"{balance=}")
         if balance < self.amount_buy:
             return True
