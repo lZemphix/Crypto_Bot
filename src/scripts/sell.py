@@ -49,6 +49,7 @@ class Sell(Checkup):
             logger.debug("Price valid for sell")
             if self.trigger.cross_up_to_down():
                 logger.debug("Trigger cross_up_to_down activated")
+                gatekeeper_storage.update_balance()
                 if self.orders.place_sell_order():
                     logger.info("Sell order placed successfully")
                     time.sleep(2)

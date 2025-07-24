@@ -74,6 +74,7 @@ class Averaging(Checkup):
                 logger.debug("valid_price")
                 if self.trigger.cross_down_to_up():
                     logger.debug("Trigger cross_down_to_up activated")
+                    gatekeeper_storage.update_balance()
                     if get_orders.place_buy_order():
                         logger.info("Buy order placed successfully")
                         time.sleep(2)

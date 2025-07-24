@@ -59,18 +59,20 @@ class FirstBuy(Checkup):
         self.lines = LinesManager()
 
     def activate(self) -> bool:
-        logger.info("Trying to do first buy")
-        if self.trigger.rsi_trigger():
-            logger.debug("State: PRICE_CORRECT")
-            if self.orders.place_buy_order():
-                logger.info("Buy order placed successfully")
-                time.sleep(2)
-                last_order = float(self.orders.get_order_history()[0].get("avgPrice"))
-                logger.debug(f"Last order price: {last_order}")
-                if self.lines.write_lines(last_order):
-                    logger.debug("Lines written successfully")
-                    Notifier().send_buy_notify(last_order)
-                    logger.debug("Notification sent for first buy")
-                    self.update_journal(last_order)
-                    logger.debug("Journal updated with new order")
-                    return True
+        if self.valid_balance():
+            logger.info("Trying to do first buy")
+            if self.trigger.rsi_trigger():
+                logger.debug("State: PRICE_CORRECT")
+                gatekeeper_storage.update_balance()
+                if self.orders.place_buy_order():
+                    logger.info("Buy order placed successfully")
+                    time.sleep(2)
+                    last_order = float(self.orders.get_order_history()[0].get("avgPrice"))
+                    logger.debug(f"Last order price: {last_order}")
+                    if self.lines.write_lines(last_order):
+                        logger.debug("Lines written successfully")
+                        Notifier().send_buy_notify(last_order)
+                        logger.debug("Notification sent for first buy")
+                        self.update_journal(last_order)
+                        logger.debug("Journal updated with new order")
+                        return True

@@ -21,14 +21,9 @@ class Formater:
         return formated_kline
 
     @staticmethod
-    def format_balance(balance: dict, method: str = 'websocket'):
+    def format_balance(balance: dict):
         formated_balance = {}
-        if method == 'websocket':
-            coins = balance["data"][0]["coin"]
-        elif method == 'init':
-            coins = balance['result']['list'][0]['coin']
-        else:
-            raise ValueError('Method can be only "websocket" or "init"')
+        coins = balance['result']['list'][0]['coin']
         for n in range(len(coins)):
             formated_balance[coins[n].get("coin")] = float(
                 coins[n].get("walletBalance")
@@ -60,14 +55,14 @@ class GatekeeperStorage(Client):
         except Exception as e:
             logger.error(e)
     
-    def __init_update(self, target: str):
+    def __req_update(self, target: str):
         try:
             if target.lower() == 'klines':
                 updating_value = get_klines.get_klines()[::-1] 
 
             elif target.lower() == 'balance':
                 balance = self.client.get_wallet_balance(accountType=self.ACCOUNT_TYPE)
-                updating_value = Formater().format_balance(balance, 'init')
+                updating_value = Formater().format_balance(balance)
             else:
                 raise ValueError('Expecting "klines" or "balance" in the target value')
             self.update(target, updating_value)
@@ -77,7 +72,7 @@ class GatekeeperStorage(Client):
     
     def update_balance(self):
         try:
-            self.__init_update('balance')
+            self.__req_update('balance')
             logger.debug("Balance part in the journal was updated")
             return True
         except Exception as e:
@@ -86,7 +81,7 @@ class GatekeeperStorage(Client):
 
     def update_klines(self):
         try:
-            self.__init_update('klines')
+            self.__req_update('klines')
             logger.debug("Klines part in the journal was updated")
             return True
         except Exception as e:
@@ -104,18 +99,18 @@ class Gatekeeper(Client):
             channel_type="spot", 
             testnet=False
         )
-        self.wallet_ws = WebSocket(
-            channel_type="private",
-            testnet=False,
-            api_key=self.API_KEY,
-            api_secret=self.API_KEY_SECRET,
-        )
+        # self.wallet_ws = WebSocket(
+        #     channel_type="private",
+        #     testnet=False,
+        #     api_key=self.API_KEY,
+        #     api_secret=self.API_KEY_SECRET,
+        # )
         self.ws.kline_stream(
             interval=self.interval, symbol=self.symbol, callback=self.klines_callback
         )
-        self.wallet_ws.wallet_stream(
-            callback=self.wallet_callback
-        )
+        # self.wallet_ws.wallet_stream(
+        #     callback=self.wallet_callback
+        # )
 
 
     def klines_callback(self, kline: dict):
@@ -136,7 +131,7 @@ class Gatekeeper(Client):
         logger.debug("Last kline was updated")
             
 
-    def wallet_callback(self, balance):
-        formated_balance = Formater().format_balance(balance)
-        gatekeeper_storage.update(balance, formated_balance)
-        logger.debug("Wallet change detected! Updating journal!")
+    # def wallet_callback(self, balance):
+    #     formated_balance = Formater().format_balance(balance)
+    #     gatekeeper_storage.update(balance, formated_balance)
+    #     logger.debug("Wallet change detected! Updating journal!")
