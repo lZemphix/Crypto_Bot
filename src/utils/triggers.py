@@ -41,8 +41,6 @@ class CrossKlinesTrigger(BotBase):
 
     def cross_down_to_up(self) -> bool:  # Покупка
         current_kline, prev_kline = self.get_klines()
-        logger.debug(f'{current_kline=}')
-        logger.debug(f'{prev_kline=}')
         buy_lines: list[float] = self.get_lines()[0]
         for buy_line in buy_lines[::-1]:
             if prev_kline < buy_line <= current_kline:
@@ -65,6 +63,5 @@ class BalanceTrigger(BotBase):
     def invalid_balance(self) -> bool:
         logger.debug("checking balance")
         balance = gatekeeper_storage.get_balance()["USDT"]
-        logger.debug(f"{balance=}")
         if balance < self.amount_buy:
             return True

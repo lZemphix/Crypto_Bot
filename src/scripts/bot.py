@@ -80,8 +80,9 @@ class States(BotBase):
 
     def insufficient_balance_state(self):
         Notifier().send_nem_notify()
-        logger.debug("Not enough money for buying, trying to sell")
+        logger.info("Not enough money for buying, trying to sell")
         while self.balance_trigger.invalid_balance():
+            time.sleep(2)
             if self.sell.activate():
                 logger.debug("Switching to FIRST_BUY state")
                 return BotState.FIRST_BUY

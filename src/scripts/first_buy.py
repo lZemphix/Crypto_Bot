@@ -63,7 +63,7 @@ class FirstBuy(Checkup):
         if self.valid_balance():
             logger.info("Trying to do first buy")
             if self.trigger.rsi_trigger():
-                logger.debug("State: PRICE_CORRECT")
+                logger.debug("rsi trigger")
                 gatekeeper_storage.update_balance()
                 if self.orders.place_buy_order():
                     logger.info("Buy order placed successfully")

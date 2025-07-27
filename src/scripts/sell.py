@@ -18,7 +18,6 @@ class Checkup(BotBase):
     def price_valid(self):
         actual_price = float(gatekeeper_storage.get_klines()[-2][4])
         sell_price = self.orders.get_avg_order() + self.stepSell
-        logger.debug(f'{actual_price=}, {sell_price=}')
         return actual_price >= sell_price
 
 

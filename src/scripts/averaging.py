@@ -26,12 +26,9 @@ class Checkup(BotBase):
 
     def valid_price(self):
         avg_order = get_orders.get_avg_order()
-        logger.debug(f'{avg_order=}')
         actual_price = float(gatekeeper_storage.get_klines()[-2][4])
-        logger.debug(f'{actual_price=}')
         step_buy = get_bot_config("stepBuy")
         price_lower_than_step = step_buy < (avg_order - actual_price)
-        logger.debug(f'{price_lower_than_step=}')
         return actual_price < avg_order and price_lower_than_step
 
     def update_journal(self, last_order: float):
