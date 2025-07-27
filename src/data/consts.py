@@ -36,5 +36,6 @@ CMX_HELP = """args:
     clear               - clears buy history (useful if bot bought and you close the position manually)
     settings            - open bot settings
     start               - start the bot
+    buy                 - write fake buy in the trade journal
     help [-h | --help]  - show this message
     """
