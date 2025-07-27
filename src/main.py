@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 
 def main():
 
-    load_logger_config(10)
+    load_logger_config(20)
     logger.info('bot was activated. Press "ctrl + c" for stop')
 
     try:
