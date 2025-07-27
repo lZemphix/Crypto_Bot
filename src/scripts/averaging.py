@@ -48,6 +48,7 @@ class Notifier(Checkup):
         super().__init__()
 
     def send_averaging_notify(self, last_order: float):
+        gatekeeper_storage.update_balance()
         balance = gatekeeper_storage.get_balance()
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
