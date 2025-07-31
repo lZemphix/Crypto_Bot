@@ -12,15 +12,24 @@ services:
       BOT_TOKEN: ${BOT_TOKEN}
       CHAT_ID: ${CHAT_ID}
     volumes:
-      - ./src/config/bot_config.json:/src/config/bot_config.json
-      - ./logs.log:/logs/log
-      - ./src/data/trade_journal.json:/src/data/trade_journal.json
+      - ./logs.log:/app/logs.log
+      - ./src/data/trade_journal.json:/app/src/data/trade_journal.json
+      - ./bot_config.json:/app/bot_config.json
     
   web:
     container_name: web-interface
+    ports:
+      - "10605:10605"
     build: 
-      context: ./web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./web/Dockerfile
     environment:
+      ACCOUNT_TYPE: ${ACCOUNT_TYPE}
+      API_KEY_SECRET: ${API_KEY_SECRET}
+      API_KEY: ${API_KEY}
       USERNAME: ${USERNAME}
       PASSWORD: ${PASSWORD}
+    volumes:
+      - ./bot_config.json:/app/bot_config.json
+    depends_on:
+      - bot
