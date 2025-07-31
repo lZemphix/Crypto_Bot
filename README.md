@@ -17,7 +17,7 @@ By using this bot, you take full responsibility for the funds. The bot does not 
 
 `git clone https://github.com/lZemphix/Crypto_Bot.git`
 
-2. Edit "bot_config.json" file (src/config/)
+2. Edit "bot_config.json" file
 3. Edit ".env.example" file and rename it to ".env"
 4. Run the bot:
 
