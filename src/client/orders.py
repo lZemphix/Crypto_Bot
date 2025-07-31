@@ -19,7 +19,7 @@ class Checkup(Client):
         super().__init__()
 
     def get_accuracy(self) -> int:
-        with open("src/config/bot_config.json", "r") as f:
+        with open("bot_config.json", "r") as f:
             config = json.load(f)
         symbol = config.get("symbol")
         info = self.client.get_instruments_info(category="spot", symbol=symbol)

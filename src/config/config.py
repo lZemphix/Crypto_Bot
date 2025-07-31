@@ -7,7 +7,7 @@ logger = getLogger(__name__)
 
 def get_bot_config(param: str = None):
     try:
-        with open("src/config/bot_config.json", "r") as f:
+        with open("bot_config.json", "r") as f:
             config: dict = json.load(f)
             if param == None:
                 return config

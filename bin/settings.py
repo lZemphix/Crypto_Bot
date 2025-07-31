@@ -6,16 +6,16 @@ from data.consts import SETTINGS_MENU
 
 
 def change_config(param: str, new_value: str | int | bool):
-    with open("src/config/bot_config.json", "r") as f:
+    with open("bot_config.json", "r") as f:
         c = json.load(f)
         c[param] = new_value
 
-    with open("src/config/bot_config.json", "w") as f:
+    with open("bot_config.json", "w") as f:
         json.dump(c, f, indent=4)
 
 
 def settings():
-    with open("src/config/bot_config.json", "r") as f:
+    with open("bot_config.json", "r") as f:
         config = json.load(f)
 
     choice = int(
