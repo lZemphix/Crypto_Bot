@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title_css %}
+    <title>CMX</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Single:wght@400&display=swap" />
+    <link rel="stylesheet" href="/static/css/index.css" />
+{% endblock title_css %}
+
+{% block main %}  
+    <main class="main-container">
+        <div class="bot-info-container">
+            <div class="bot-info-text">Bot information</div>
+            <div class="bot-info-content">
+                <div class="tag-text">
+                    <div class="tag">Status:</div>
+                    <div class="tag">Pair:</div>
+                    <div class="tag">Balance(q):</div>
+                    <div class="tag">Balance(b):</div>
+                </div>
+                <div class="status-text">
+                    <div class="status" id="status">{{ status }}</div>
+                    <div class="status" id="pair">{{ pair }}</div>
+                    <div class="status" id="balanceq">{{ balanceq }}</div>
+                    <div class="status" id="balanceb">{{ balanceb }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="graph-container">
+            <div class="graph-text">Graph</div>
+            <div class="tradingview-widget-container">
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                {
+                "allow_symbol_change": false,
+                "calendar": false,
+                "hide_side_toolbar": true,
+                "hide_top_toolbar": false,
+                "hide_legend": true,
+                "hide_volume": true,
+                "hotlist": false,
+                "interval": "{{ interval }}",
+                "locale": "en",
+                "save_image": false,
+                "style": "1",
+                "symbol": "BYBIT:{{ pair }}",
+                "theme": "dark",
+                "timezone": "Etc/UTC",
+                "backgroundColor": "rgba(150, 150, 150, 1)",
+                "gridColor": "rgba(0, 0, 0, 0.1)",
+                "watchlist": [],
+                "withdateranges": false,
+                "compareSymbols": [],
+                "studies": [],
+                "width": 1128,
+                "height": 586
+                }
+                </script>
+            </div>
+        </div>
+    </main>
+{% endblock main %} 

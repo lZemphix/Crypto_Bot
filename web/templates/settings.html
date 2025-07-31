@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title_css %}
+<title>CMX</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Single:wght@400&display=swap" />
+<link rel="stylesheet" href="/static/css/settings.css" />
+{% endblock title_css %}
+
+{% block main %}
+<main>
+    <div class="settings-title-text">-settings-</div>
+    <form action="/settings" method="post" id="config">
+        <div class="bot-env-settings">
+            <div class="bot-configuration-container">
+                <div class="bot-configuration-text">Bot configuration</div>
+                <div class="content-container">
+                    <div class="parameter">
+                        <div class="content-name">Pair [str]</div>
+                        <input class="content-value" name="symbol" value="{{ symbol }}"></input>
+                    </div>
+                    <div class="parameter">
+                        <div class="content-name">Interval [int]</div>
+                        <input class="content-value" name="interval" value="{{ interval }}"></input>
+                    </div>
+                    <div class="parameter">
+                        <div class="content-name">OrderPrice [float]</div>
+                        <input class="content-value" name="amountBuy" value="{{ amountBuy }}"></input>
+                    </div>
+                    <div class="parameter">
+                        <div class="content-name">RSI [int]</div>
+                        <input class="content-value" name="RSI" value="{{ RSI }}"></input>
+                    </div>
+                    <div class="parameter">
+                        <div class="content-name">BuyStep [float]</div>
+                        <input class="content-value" name="stepBuy" value="{{ stepBuy }}"></input>
+                    </div>
+                    <div class="parameter">
+                        <div class="content-name">SellStep [float]</div>
+                        <input class="content-value" name="stepSell" value="{{ stepSell }}"></input>
+                    </div>
+                    <div class="parameter">
+                        <div class="content-name">TelegramNotifies [bool]</div>
+                        <input class="content-checkbox" type="checkbox" name="send_notify" checked></input>
+                    </div>
+                </div>
+            </div>
+            <div class="env-configuration-container">
+                <div class="env-configuration-text">Environment configuration</div>
+                <div class="env-content-container">
+                    <input class="env-parameter" name="ACCOUNT_TYPE" placeholder="ACCOUNT_TYPE" value="{{ ACCOUNT_TYPE }}"></input>
+                    <input class="env-parameter" name="API_KEY_SECRET" type="password" placeholder="API_KEY_SECRET" value="{{ API_KEY_SECRET }}"></input>
+                    <input class="env-parameter" name="API_KEY" type="password" placeholder="API_KEY" value="{{ API_KEY }}"></input>
+                    <input class="env-parameter" name="BOT_TOKEN" type="password" placeholder="BOT_TOKEN" value="{{ BOT_TOKEN }}"></input>
+                    <input class="env-parameter" name="CHAT_ID" placeholder="CHAT_ID" value="{{ CHAT_ID }}"></input>
+                </div>
+            </div>
+        </div>
+        <div class="scripts-configuration-container">
+            <div class="scripts-configuration-text">Scripts</div>
+            <div class="scripts-content-container">
+                <div class="scripts-text">Will be available soon...</div>
+            </div>
+        </div>
+        <button class="save-button" type="save-settings" form="config">-save-</button>
+    </form>
+    </div>
+    </div>
+    
+</main>
+{% endblock main %}

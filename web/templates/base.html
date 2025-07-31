@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block title_css %}{% endblock title_css %}
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <a class='logo' href="/">-CMX-</a>
+            <div class="nav-bar">
+                <a class='nav-bar-btn' href="/settings">-settings-</a>
+                <a class='nav-bar-btn' href="/info">-info-</a>
+                <a class='nav-bar-btn' href="/statistic">-logout-</a>
+            </div>
+        </div>
+    </header>
+
+    {% block main %}{% endblock main %}
+
+</body>
+</html>
