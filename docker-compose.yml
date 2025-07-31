@@ -15,3 +15,12 @@ services:
       - ./src/config/bot_config.json:/src/config/bot_config.json
       - ./logs.log:/logs/log
       - ./src/data/trade_journal.json:/src/data/trade_journal.json
+    
+  web:
+    container_name: web-interface
+    build: 
+      context: ./web
+      dockerfile: Dockerfile
+    environment:
+      USERNAME: ${USERNAME}
+      PASSWORD: ${PASSWORD}
