@@ -3,7 +3,7 @@
     "interval": 5,
     "amountBuy": 5.5,
     "RSI": 41,
-    "stepBuy": 750,
-    "stepSell": 650,
+    "stepBuy": 750.0,
+    "stepSell": 700.0,
     "send_notify": true
 }
