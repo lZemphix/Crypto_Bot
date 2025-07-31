@@ -11,6 +11,6 @@ COPY pyproject.toml poetry.lock ./
 RUN python3 -m poetry config virtualenvs.create false \
     && python3 -m poetry install --no-interaction --no-ansi --no-root
 
-COPY . .
+COPY web/ web/
 
-ENTRYPOINT ["python3", "src/web.py"]
+ENTRYPOINT ["python3", "web/main.py"]
