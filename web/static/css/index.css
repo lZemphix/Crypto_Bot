@@ -1,0 +1,41 @@
+@import url('styles.css');
+
+
+
+.bot-info-container {
+    margin-left: 36px;
+    margin-top: 50px;
+    font-size: 18px;
+}
+
+.bot-info-text {
+    margin-left: 10px;
+}
+
+.bot-info-content {
+    padding: 5px 10px 5px 10px;
+    background-color: #969696;
+    max-width: 275px;
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #000; 
+}
+
+.status {
+    text-align: right;
+}
+
+.graph-text {
+    margin-left: 10px;
+}
+
+.graph-container {
+    margin-top: 40px;
+    margin-left: 36px;
+}
+
+.tradingview-widget-container {
+    border: 1px solid black
+}
+
+

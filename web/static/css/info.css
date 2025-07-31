@@ -1,0 +1,22 @@
+@import url('styles.css');
+
+.info-title-text {
+    margin-top: 10px;
+    font-size: 46px;
+    display: flex;
+    justify-content: center;
+}
+
+p {
+    margin: 10px 10px 10px 20px;
+    font-size: 24px;
+    text-indent: 40px;
+}
+
+
+
+h1, h2, h3, h4, h5, h6 {
+    margin-left: 20px;
+    margin: 0px;
+    padding-left: 20px ;
+}

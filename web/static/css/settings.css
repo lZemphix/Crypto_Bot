@@ -1,0 +1,152 @@
+@import url('styles.css');
+
+.settings-title-text {
+    margin-top: 10px;
+    font-size: 46px;
+    display: flex;
+    justify-content: center;
+}
+
+.bot-configuration-text {
+    font-size: 18px;
+    margin-left: 10px;
+}
+
+.bot-configuration-container {
+    margin-top: 20px;
+    margin-left: 50px;    
+    max-width: 500px;
+}
+
+.content-container {
+    border: 1px solid black;
+    background-color: #969696;
+    min-width: 500px;
+    height: 310px;
+    padding: 20px;
+}
+
+.content-checkbox {
+    background-color: #505050;
+    color: #242424;
+    border: 2px solid #000;
+}
+
+.parameter {
+    background-color: #707070;
+    display: flex;
+    justify-content: space-between;
+    font-size: 24px;
+    border: 1px solid black;
+    margin: 0px 0px 10px 0px;    
+    align-items: center;    
+}
+
+.content-name {
+    margin-left: 5px;
+
+}
+
+.content-value {
+    font-family: "Bitcount Grid Single", system-ui;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 24px;
+    background-color: #505050;
+    text-align: right;
+    border: 1px solid black;
+    width: 110px;
+    height: 30px;
+    overflow: hidden;
+}
+
+.bot-env-settings {
+    display: flex;
+    flex-wrap: wrap;
+
+}
+
+.env-content-container {
+    border: 1px solid black;
+    background-color: #969696;
+    padding: 20px;
+    margin-left: 60px;
+}
+
+.env-parameter {
+    background-color: #707070;
+    display: flex;
+    justify-content: space-between;
+    font-size: 24px;
+    border: 1px solid black;
+    margin: 0px 0px 10px 0px;    
+    align-items: center;    
+    min-width: 450px;
+}
+
+.env-parameter::placeholder {
+    font-family: "Bitcount Grid Single", system-ui;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 24px;
+    color:#242424;
+}
+
+.env-configuration-container {
+    margin-top: 20px;
+    margin-left: 50px;    
+    min-width: 500px;
+}
+
+.env-configuration-text {
+    font-size: 18px;
+    margin-left: 70px;
+}
+
+.scripts-configuration-container {
+    margin-top: 20px;
+    margin-left: 50px;    
+    max-width: 500px;
+    height: 50px;
+}
+
+.scripts-configuration-text {
+    font-size: 18px;
+    margin-left: 10px;
+}
+
+.scripts-content-container {
+    display: flex;
+    border: 1px solid black;
+    background-color: #969696;
+    height: 150px;
+    padding: 20px;
+    align-items: center;
+}
+
+.scripts-text {
+    font-size: 24px;
+    margin: 0 auto;
+}
+
+.save-button {
+    position: absolute;
+    top: 880px;
+    left: 1400px;
+    font-family: "Bitcount Grid Single", system-ui;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 18px;
+    width: 110px;
+    height: 27px;
+    background-color: #505050;
+    border: 2px solid #000;
+}
+
+.save-button:active {
+    background-color: #707070;
+}
+
