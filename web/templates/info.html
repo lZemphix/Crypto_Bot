@@ -1,52 +1,66 @@
 {% extends "base.html" %}
 
 {% block title_css %}
-    <title>CMX</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Single:wght@400&display=swap" />
-    <link rel="stylesheet" href="/static/css/info.css" />
+<title>CMX</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Single:wght@400&display=swap" />
+<link rel="stylesheet" href="/static/css/info.css" />
 {% endblock title_css %}
 
-{% block main %}  
-    <main class="main-container">
-        <div class="info-title-text">-info-</div>
-        
-        <h1>-About CMX-</h1>
-        <p><b style="font-size: 30px;">CMX</b> is an open-source grid bot designed for automated trading on the Bybit exchange. It allows trading on any trading pair via USDT.</p>
-        
-        <h1 style="color: rgb(136, 0, 0);">-Disclaimer-</h1>
-        <p>This trading bot is provided "as is" for <u>informational</u> and <u>educational</u> purposes only. It does <u>not guarantee profits</u>, and trading always involves significant <u>risk of financial loss</u>. <u>You are solely responsible</u> for all trading decisions and the management of your funds. By using this bot, you acknowledge that <u>the developer(s) bear no responsibility</u> for any financial losses, technical errors, or unexpected market behavior. Use this software entirely <u>at your own risk</u>. Cryptocurrency trading is highly volatile; <    u>you may lose your entire investment.</u></p>
+{% block main %}
+<main class="main-container">
+    <div class="info-title-text">-info-</div>
 
-        <h1>-How does this works?-</h1>
-        <p>The bot operates on a simple principle: it buys when the RSI indicator reaches a certain level and sets up buy/sell grid lines. If the price crosses the 'buy line' from below (indicating an upward trend after a decline), the bot averages the position and adjusts the grid lines based on the new average order price. If the price crosses the 'sell line' from above (signaling a downward trend after a rise), the bot sells and the cycle restarts.</p>
-        
-        <h1>-Bot information-</h1>
-        <p><b>Status: </b>shows status of bot (on/off but if u can use web-interface - bot is active)</p>
-        <p><b>Pair: </b>Trading pair for the bot (e.g., BTCUSDT, ETHUSDT, SOLUSDT).</p> 
-        <p><b>Balance(q):</b> Shows your balance in quote coin (USDT only)</p> 
-        <p><b>Balance(b):</b> Shows your balance in base coin (BTC, ETH, SOL)</p> 
+    <h1>-About CMX-</h1>
+    <p><b style="font-size: 30px;">CMX</b> is an open-source grid bot designed for automated trading on the Bybit
+        exchange. It allows trading on any trading pair via USDT.</p>
 
-        <h1>-Settings-</h1>
-        <p>The bot offers extensive customization options for flexible and precise trading strategy configuration.</p>
-        <p><b>Warning!</b> if u want to change your bots settings turn it off firstly!!!</p>
-        
-        <h2>I. Bot Configuration Settings:</h2> 
-        <p><b>Pair:</b> Trading pair for the bot (e.g., BTCUSDT, ETHUSDT, SOLUSDT).</p> 
-        <p><b>Interval:</b> Candlestick timeframe used for RSI calculation (options: 1, 3, 5, 10, 15, 30, 60, 120, 240, 360, 720).</p>
-        <p><b>OrderPrice:</b> USDT amount per buy/averaging order (min: 5.5). </p>
-        <p><b>RSI:</b> Indicator value triggering grid initialization (recommended: 35-42).</p>
-        <p><b>BuyStep/SellStep:</b> Grid line spacing adjustments after buy/averaging events.</p>
-        <p><b>TelegramNotifies:</b> Enable/disable trade notifications (requires BOT_TOKEN and CHAT_ID if enabled). </p>
-        
-        <h2>II. Environment Variables (for Bybit account integration):</h2>
-        <p><b>ACCOUNT_TYPE:</b> Bybit account type (default: UNIFIED). </p>
-        <p><b>API_KEY:</b> Your Bybit API key (see setup guide below). </p>
-        <p><b>API_KEY_SECRET:</b> Your Bybit API secret key (see setup guide below).</p>
-        <p><b>BOT_TOKEN:</b> Telegram bot token for notifications (see setup guide below). </p>
-        <p><b>CHAT_ID:</b> Your Telegram user ID (see setup guide below).</p>
+    <h1 style="color: rgb(136, 0, 0);">-Disclaimer-</h1>
+    <p>This trading bot is provided "as is" for <u>informational</u> and <u>educational</u> purposes only. It does
+        <u>not guarantee profits</u>, and trading always involves significant <u>risk of financial loss</u>. <u>You are
+            solely responsible</u> for all trading decisions and the management of your funds. By using this bot, you
+        acknowledge that <u>the developer(s) bear no responsibility</u> for any financial losses, technical errors, or
+        unexpected market behavior. Use this software entirely <u>at your own risk</u>. Cryptocurrency trading is highly
+        volatile; < u>you may lose your entire investment.</u></p>
+
+    <h1>-How does this works?-</h1>
+    <p>The bot operates on a simple principle: it buys when the RSI indicator reaches a certain level and sets up
+        buy/sell grid lines. If the price crosses the 'buy line' from below (indicating an upward trend after a
+        decline), the bot averages the position and adjusts the grid lines based on the new average order price. If the
+        price crosses the 'sell line' from above (signaling a downward trend after a rise), the bot sells and the cycle
+        restarts.</p>
+
+    <h1>-Bot information-</h1>
+    <p><b>Status: </b>shows status of bot (on/off but if u can use web-interface - bot is active)</p>
+    <p><b>Pair: </b>Trading pair for the bot (e.g., BTCUSDT, ETHUSDT, SOLUSDT).</p>
+    <p><b>Balance(q):</b> Shows your balance in quote coin (USDT only)</p>
+    <p><b>Balance(b):</b> Shows your balance in base coin (BTC, ETH, SOL)</p>
+
+    <h1>-Settings-</h1>
+    <p>The bot offers extensive customization options for flexible and precise trading strategy configuration.</p>
+    <p><b>Warning!</b> if u want to change your bots settings turn it off firstly!!!</p>
+
+    <h2>I. Bot Configuration Settings:</h2>
+    <p><b>Pair:</b> Trading pair for the bot (e.g., BTCUSDT, ETHUSDT, SOLUSDT).</p>
+    <p><b>Interval:</b> Candlestick timeframe used for RSI calculation (options: 1, 3, 5, 10, 15, 30, 60, 120, 240, 360,
+        720).</p>
+    <p><b>OrderPrice:</b> USDT amount per buy/averaging order (min: 5.5). </p>
+    <p><b>RSI:</b> Indicator value triggering grid initialization (recommended: 35-42).</p>
+    <p><b>BuyStep/SellStep:</b> Grid line spacing adjustments after buy/averaging events.</p>
+    <p><b>TelegramNotifies:</b> Enable/disable trade notifications (requires BOT_TOKEN and CHAT_ID if enabled). </p>
+
+    <h2>II. Environment Variables (for Bybit account integration):</h2>
+    <p><b>ACCOUNT_TYPE:</b> Bybit account type (default: UNIFIED). </p>
+    <p><b>API_KEY:</b> Your Bybit API key (see setup guide below). </p>
+    <p><b>API_KEY_SECRET:</b> Your Bybit API secret key (see setup guide below).</p>
+    <p><b>BOT_TOKEN:</b> Telegram bot token for notifications (see setup guide below). </p>
+    <p><b>CHAT_ID:</b> Your Telegram user ID (see setup guide below).</p>
 
 
-        <h1>-Links-</h1>
-        <p>Github: <a style="color: black;" href="https://github.com/lZemphix/Crypto_Bot#">https://github.com/lZemphix/Crypto_Bot</a></p>
-
-    </main>
-{% endblock main %} 
+    <h1>-Links-</h1>
+    <p>Github: <a style="color: black;"
+            href="https://github.com/lZemphix/Crypto_Bot#">https://github.com/lZemphix/Crypto_Bot</a></p>
+    <footer>
+        <div class="version">Version: v1.2.1c</div>
+    </footer>
+</main>
+{% endblock main %}
