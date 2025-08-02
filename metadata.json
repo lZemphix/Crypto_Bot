@@ -1,0 +1,12 @@
+{
+    "last_action": {
+        "type": "sell",
+        "date": "2025-08-01 19:32:16"
+    },
+    "actual": {
+        "orders_amount": 4,
+        "avg_order_price": 3739.405,
+        "closest_s_line": 3819.405,
+        "closest_a_line": 3539.21
+    }
+}
