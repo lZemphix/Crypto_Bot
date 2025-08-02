@@ -1,10 +1,16 @@
 @import url('styles.css');
 
+.main-container {
+    display: flex;
+    margin: 0 auto;  
+    max-width: 1200px;
+    min-height: 92vh;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+}
 
-
-.bot-info-container {
-    margin-left: 36px;
-    margin-top: 50px;
+.bot-base-info-container {
+    width: 300px;
     font-size: 18px;
 }
 
@@ -30,7 +36,7 @@
 }
 
 .graph-container {
-    margin-top: 40px;
+    margin-top: 50px;
     margin-left: 36px;
 }
 
@@ -38,4 +44,48 @@
     border: 1px solid black
 }
 
+
+.last-action-container {
+    width: 330px;
+    margin: 0px 0px 0px 50px;
+}
+
+.actual-actions-container {
+    width: 400px;
+    margin: 0px 0px 0px 0px;
+}
+
+.bot-info-container {
+    margin-left: 36px;
+    margin-top: 50px;
+    display: flex;
+}
+
+.actions-group {
+    display: flex;
+}
+
+.tag {
+    white-space: nowrap;
+}
+.status {
+    white-space: nowrap;
+
+}
+
+.bot-actions-container {
+    margin: 0px 0px 0px 50px;
+}
+
+.bot-actions-content {
+    padding: 5px 10px 5px 10px;
+    background-color: #969696;
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #000; 
+}
+
+.bot-actions-text {
+    margin: 0px 0px 0px 10px;
+}
 
