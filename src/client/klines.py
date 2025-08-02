@@ -10,6 +10,7 @@ class Klines(Client):
         super().__init__()
 
     def get_klines(self, limit: int = 200) -> dict:
+        """returns klines dict like {[timetsamp, open, high, low, close, volume, turnover]}"""
         try:
             kline = self.client.get_kline(
                 symbol=self.symbol,
