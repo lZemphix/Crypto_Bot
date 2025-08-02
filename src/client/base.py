@@ -8,6 +8,7 @@ logger = getLogger(__name__)
 
 
 class Client:
+    """Base dataclass. Containts .env variables and client object for pybit requests"""
 
     def __init__(self) -> None:
         super().__init__()
@@ -26,6 +27,8 @@ class Client:
 
 
 class BotBase:
+    """Base dataclass. Contains bot config variables and telenotify, journal and other class objects"""
+
     def __init__(self) -> None:
         super().__init__()
         self.symbol: str = get_bot_config("symbol")
