@@ -1,14 +1,15 @@
 from logging import getLogger
-import time
-from scripts.averaging import Averaging
-from scripts.sell import Sell
+from client.base import BotBase
 from client.orders import get_orders
+from scripts.averaging import Averaging
+from scripts.first_buy import FirstBuy
+from scripts.sell import Sell
 from utils.gatekeeper import gatekeeper_storage, Gatekeeper
 from utils.states import BotState
-from client.base import BotBase
-from scripts.first_buy import FirstBuy
-from data.consts import *
+from utils.metadata_manager import MetaManager
 from utils.triggers import BalanceTrigger
+from data.consts import *
+import time
 
 
 logger = getLogger(__name__)
@@ -21,6 +22,7 @@ def initial_update():
                 return True
     except Exception as e:
         logger.error(e)
+
 
 class Price(BotBase):
     def __init__(self):
@@ -103,6 +105,7 @@ class States(BotBase):
         if self.averaging.activate():
             logger.info("Averaged. Switching to WAITING state")
             gatekeeper_storage.update_balance()
+            MetaManager().update_all(type="average")
         else:
             logger.info("Not averaged. Switching to WAITING state")
         return BotState.WAITING
@@ -111,6 +114,7 @@ class States(BotBase):
         if self.sell.activate():
             logger.info("Sold. Switching to FIRST_BUY state")
             gatekeeper_storage.update_balance()
+            MetaManager().update_all(type="sell")
             return BotState.FIRST_BUY
         else:
             logger.info("Not sold. Switching to WAITING state")
@@ -120,6 +124,7 @@ class States(BotBase):
         if self.first_buy.activate():
             logger.info("Bought. Switching to WAITING state")
             gatekeeper_storage.update_balance()
+            MetaManager().update_all(type="first buy")
             return BotState.WAITING
         return BotState.FIRST_BUY
 
@@ -132,7 +137,7 @@ class Bot(BotBase):
     def activate(self):
         Gatekeeper()
         if not initial_update():
-            raise SystemExit('Can\'t do initial update')
+            raise SystemExit("Can't do initial update")
         current_state = BotState.WAITING
         logger.info("Bot was activated!")
         Notifier().send_activate_notify()
