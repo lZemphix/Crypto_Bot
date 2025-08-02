@@ -6,7 +6,8 @@ load_dotenv()
 
 templates = Jinja2Templates(directory="web/templates")
 
-router = APIRouter(prefix='/statistic')
+router = APIRouter(prefix="/statistic")
+
 
 @router.get("/")
 async def settings(request: Request):

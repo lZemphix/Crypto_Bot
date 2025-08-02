@@ -24,6 +24,5 @@ static_dir = os.path.join(current_dir, "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run("main:app", reload=True, port=10605, host="0.0.0.0")
-

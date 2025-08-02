@@ -50,7 +50,6 @@ class Notifier(Checkup):
         )
 
 
-
 class FirstBuy(Checkup):
 
     def __init__(self):
@@ -68,7 +67,9 @@ class FirstBuy(Checkup):
                 if self.orders.place_buy_order():
                     logger.info("Buy order placed successfully")
                     time.sleep(2)
-                    last_order = float(self.orders.get_order_history()[0].get("avgPrice"))
+                    last_order = float(
+                        self.orders.get_order_history()[0].get("avgPrice")
+                    )
                     logger.debug(f"Last order price: {last_order}")
                     if self.lines.write_lines(last_order):
                         logger.debug("Lines written successfully")
