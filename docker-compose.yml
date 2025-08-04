@@ -31,5 +31,6 @@ services:
       PASSWORD: ${PASSWORD}
     volumes:
       - ./bot_config.json:/app/bot_config.json
+      - ./metadata.json:/app/metadata.json
     depends_on:
       - bot
