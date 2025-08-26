@@ -78,6 +78,6 @@ class FirstBuy(Checkup):
                         logger.debug("Notification sent for first buy")
                         self.update_journal(last_order)
                         logger.debug("Journal updated with new order")
-                        MetaManager().update_all(type="average")
+                        MetaManager().update_all(type="first_buy")
                         logger.debug("Metadata was writed")
                         return True

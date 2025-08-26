@@ -6,7 +6,6 @@ from scripts.first_buy import FirstBuy
 from scripts.sell import Sell
 from utils.gatekeeper import gatekeeper_storage, Gatekeeper
 from utils.states import BotState
-from utils.metadata_manager import MetaManager
 from utils.triggers import BalanceTrigger
 from data.consts import *
 import time
@@ -137,7 +136,6 @@ class States(BotBase):
         if self.first_buy.activate():
             logger.info("Bought. Switching to WAITING state")
             gatekeeper_storage.update_balance()
-            MetaManager().update_all(type="first buy")
             logger.debug('out States.first_buy_state WAITING' )
             return BotState.WAITING
         logger.debug('out States.first_buy_state FIRST_BUY')
