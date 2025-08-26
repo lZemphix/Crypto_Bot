@@ -31,7 +31,7 @@ class Notifier(Checkup):
         last_order_price = float(last_order["avgPrice"])
         coin_qty = float(last_order["cumExecQty"])
         self.telenotify.sold(
-            f"Bot was sold {coin_qty:.10f} {self.coin_name} for {last_order_price}.\nTotal: price: {coin_qty*last_order_price}"
+            f"Bot was sold```\n{coin_qty:.10f} {self.coin_name} for {last_order_price}.\nTotal: price: {coin_qty*last_order_price}```"
         )
 
 
