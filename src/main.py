@@ -1,4 +1,5 @@
 from logging import getLogger
+import logging
 import sys
 from scripts.bot import Bot
 from config.logger_config import load_logger_config
@@ -15,6 +16,9 @@ def main():
 
     load_logger_config(20)
     logger.info('bot was activated. Press "ctrl + c" for stop')
+    logging.getLogger("_http_manager").setLevel(30)
+    logging.getLogger("urllib3").setLevel(30)
+    logging.getLogger("requests").setLevel(30)
 
     try:
         Bot().activate()
