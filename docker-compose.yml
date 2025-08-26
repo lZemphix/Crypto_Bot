@@ -13,6 +13,7 @@ services:
       CHAT_ID: ${CHAT_ID}
     volumes:
       - ./logs.log:/app/logs.log
+      - ./metadata.json:/app/metadata.json
       - ./src/data/trade_journal.json:/app/src/data/trade_journal.json
       - ./bot_config.json:/app/bot_config.json
     
