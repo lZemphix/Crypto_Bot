@@ -7,6 +7,7 @@ from config.config import get_bot_config
 from utils.gatekeeper import gatekeeper_storage
 from utils.journal_manager import JournalManager
 from utils.lines_manager import LinesManager
+from utils.metadata_manager import MetaManager
 from utils.states import BuyState
 from utils.triggers import CrossKlinesTrigger
 
@@ -82,6 +83,8 @@ class Averaging(Checkup):
                             logger.debug("Journal updated with new order")
                             if self.lines.write_lines(float(last_order)):
                                 logger.debug("Lines written successfully")
+                                MetaManager().update_all(type="average")
+                                logger.debug("Metadata was writed")
                                 Notifier().send_averaging_notify(last_order)
                                 logger.debug("Notification sent for averaging")
                                 return True

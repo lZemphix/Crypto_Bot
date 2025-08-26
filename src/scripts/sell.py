@@ -4,6 +4,7 @@ from client.base import BotBase
 from client.orders import Orders
 from utils.gatekeeper import gatekeeper_storage
 from utils.journal_manager import JournalManager
+from utils.metadata_manager import MetaManager
 from utils.triggers import CrossKlinesTrigger
 
 logger = getLogger(__name__)
@@ -54,6 +55,7 @@ class Sell(Checkup):
                     time.sleep(2)
                     Notifier().send_buy_notify()
                     logger.info("Notification sent for sell")
+                    MetaManager().update_all(type="sell")
                     self.journal.clear()
                     logger.info("Journal cleared after sell")
                     return True

@@ -2,6 +2,7 @@ import time
 from utils.lines_manager import LinesManager
 from client.base import BotBase
 from client.orders import Orders
+from utils.metadata_manager import MetaManager
 from utils.triggers import IndicatorTrigger
 from logging import getLogger
 from data.consts import FIRST_BUY_MESSAGE
@@ -77,4 +78,6 @@ class FirstBuy(Checkup):
                         logger.debug("Notification sent for first buy")
                         self.update_journal(last_order)
                         logger.debug("Journal updated with new order")
+                        MetaManager().update_all(type="average")
+                        logger.debug("Metadata was writed")
                         return True

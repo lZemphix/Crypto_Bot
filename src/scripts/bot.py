@@ -117,7 +117,6 @@ class States(BotBase):
         logger.debug('enter States.averaging_state')
         if self.averaging.activate():
             gatekeeper_storage.update_balance()
-            MetaManager().update_all(type="average")
             logger.info("Averaged. Switching to WAITING state")
         logger.debug('out States.waiting_state')
         return BotState.WAITING
@@ -127,7 +126,6 @@ class States(BotBase):
         if self.sell.activate():
             logger.info("Sold. Switching to FIRST_BUY state")
             gatekeeper_storage.update_balance()
-            MetaManager().update_all(type="sell")
             logger.debug('out States.sell_state First')
             return BotState.FIRST_BUY
         else:
