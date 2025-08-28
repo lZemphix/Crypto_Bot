@@ -20,7 +20,7 @@ class Klines(Client):
             )
             return kline["result"]["list"]
         except Exception as e:
-            logger.warning("Getting klines error! Message: %s", e)
+            logger.exception(f"getting klines error! Message: {e}")
             return None
 
 

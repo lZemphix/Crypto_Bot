@@ -1,7 +1,7 @@
 import time
 from utils.lines_manager import LinesManager
 from client.base import BotBase
-from client.orders import Orders
+from client.orders import get_orders
 from utils.metadata_manager import MetaManager
 from utils.triggers import IndicatorTrigger
 from logging import getLogger
@@ -55,7 +55,6 @@ class FirstBuy(Checkup):
 
     def __init__(self):
         super().__init__()
-        self.orders = Orders()
         self.trigger = IndicatorTrigger()
         self.lines = LinesManager()
 
@@ -65,11 +64,11 @@ class FirstBuy(Checkup):
             if self.trigger.rsi_trigger():
                 logger.debug("rsi trigger")
                 gatekeeper_storage.update_balance()
-                if self.orders.place_buy_order():
+                if get_orders.place_buy_order():
                     logger.info("Buy order placed successfully")
                     time.sleep(2)
                     last_order = float(
-                        self.orders.get_order_history()[0].get("avgPrice")
+                        get_orders.get_order_history()[0].get("avgPrice")
                     )
                     logger.debug(f"Last order price: {last_order}")
                     if self.lines.write_lines(last_order):

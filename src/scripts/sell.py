@@ -1,7 +1,7 @@
 from logging import getLogger
 import time
 from client.base import BotBase
-from client.orders import Orders
+from client.orders import get_orders
 from utils.gatekeeper import gatekeeper_storage
 from utils.journal_manager import JournalManager
 from utils.metadata_manager import MetaManager
@@ -14,11 +14,10 @@ class Checkup(BotBase):
 
     def __init__(self) -> None:
         super().__init__()
-        self.orders = Orders()
 
     def price_valid(self):
         actual_price = float(gatekeeper_storage.get_klines()[-2][4])
-        sell_price = self.orders.get_avg_order() + self.stepSell
+        sell_price = get_orders.get_avg_order() + self.stepSell
         return actual_price >= sell_price
 
 
@@ -28,7 +27,7 @@ class Notifier(Checkup):
         super().__init__()
 
     def send_buy_notify(self):
-        last_order = self.orders.get_order_history()[0]
+        last_order = get_orders.get_order_history()[0]
         last_order_price = float(last_order["avgPrice"])
         coin_qty = float(last_order["cumExecQty"])
         self.telenotify.sold(
@@ -50,7 +49,7 @@ class Sell(Checkup):
             if self.trigger.cross_up_to_down():
                 logger.debug("Trigger cross_up_to_down activated")
                 gatekeeper_storage.update_balance()
-                if self.orders.place_sell_order():
+                if get_orders.place_sell_order():
                     logger.info("Sell order placed successfully")
                     time.sleep(2)
                     Notifier().send_buy_notify()

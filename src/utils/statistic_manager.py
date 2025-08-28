@@ -7,9 +7,10 @@ class DateManager:
         pass
 
     def date_delta(self) -> bool:
-        last_stat = (StatisticTable().get_all_statistic())[-1]
-        if not last_stat:
+        stats = StatisticTable().get_all_statistic()
+        if not stats:
             return True
+        last_stat = stats[-1]
         delta = datetime.datetime.now() - last_stat.date
         one_day = datetime.timedelta(days=1)
         if delta >= one_day:

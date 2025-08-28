@@ -14,4 +14,3 @@ def load_logger_config(level: int = 10):
 
     logging.getLogger("urllib3").setLevel(30)
     logging.getLogger("requests").setLevel(30)
-    logging.getLogger("_http_manager").setLevel(30)
