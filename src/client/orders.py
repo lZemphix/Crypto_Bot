@@ -1,7 +1,6 @@
 import json
 from logging import getLogger
-from client.base import Client
-from utils.gatekeeper import gatekeeper_storage
+from utils.gatekeeper import GatekeeperStorage
 from config.config import get_bot_config
 from utils.exceptions import (
     IncorrectOpenOrdersList,
@@ -9,28 +8,29 @@ from utils.exceptions import (
     OrderPlaceException,
 )
 from utils.journal_manager import JournalManager
+from pybit.unified_trading import HTTP
 
 
 logger = getLogger(__name__)
 
 
-class Checkup(Client):
-    def __init__(self):
-        super().__init__()
+class Checkup:
+    def __init__(self, client: HTTP, symbol: str):
+        self.client = client
+        self.symbol = symbol
 
     def get_accuracy(self) -> int:
-        with open("bot_config.json", "r") as f:
-            config = json.load(f)
-        symbol = config.get("symbol")
-        info = self.client.get_instruments_info(category="spot", symbol=symbol)
+        info = self.client.get_instruments_info(category="spot", symbol=self.symbol)
         min_order_qty = info["result"]["list"][0]["lotSizeFilter"]["minOrderQty"]
         return len(min_order_qty)
 
 
 class Orders(Checkup):
-    def __init__(self):
-        super().__init__()
-        self.journal = JournalManager()
+    def __init__(self, client: HTTP, symbol: str, journal: JournalManager, gatekeeper_storage: GatekeeperStorage, amount_buy: float):
+        super().__init__(client=client, symbol=symbol)
+        self.journal = journal
+        self.gatekeeper_storage = gatekeeper_storage
+        self.amount_buy = amount_buy
 
     def get_order_history(self) -> dict:
         """cancelType: [CancelByUser | UNKNOWN]
@@ -63,7 +63,7 @@ class Orders(Checkup):
                 side="Buy",
                 orderType="Market",
                 marketUnit="quoteCoin",
-                qty=get_bot_config("amountBuy"),
+                qty=self.amount_buy,
             )
             return True
         except Exception as e:
@@ -74,7 +74,7 @@ class Orders(Checkup):
         """Places sell order"""
         try:
             coin_name = self.symbol.replace("USDT", "")
-            amount = f"{gatekeeper_storage.get_balance().get(coin_name):.10f}"[
+            amount = f"{self.gatekeeper_storage.get_balance().get(coin_name):.10f}"[
                 : self.get_accuracy()
             ]
             logger.info(f"{amount=}")
@@ -93,6 +93,3 @@ class Orders(Checkup):
     def get_avg_order(self) -> float:
         orders = self.journal.get()["orders"]
         return (sum(orders) / len(orders)) if len(orders) > 0 else 0
-
-
-get_orders = Orders()

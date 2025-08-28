@@ -1,9 +1,8 @@
-import json
-import time
 from pybit.unified_trading import WebSocket
-from client.base import Client
-from client.klines import get_klines
+from pybit.unified_trading import HTTP
+from client.klines import Klines
 from logging import getLogger
+
 
 logger = getLogger(__name__)
 
@@ -31,10 +30,12 @@ class Formater:
         return formated_balance
 
 
-class GatekeeperStorage(Client):
+class GatekeeperStorage:
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, klines: Klines, client: HTTP, account_type: str):
+        self.klines = klines
+        self.client = client
+        self.account_type = account_type
         self.storage: dict = {"balance": {}, "klines": []}
 
     def get(self) -> dict[dict[float], dict[float]]:
@@ -56,16 +57,16 @@ class GatekeeperStorage(Client):
     def __req_update(self, target: str):
         try:
             if target.lower() == "klines":
-                updating_value = get_klines.get_klines()[::-1]
+                updating_value = self.klines.get_klines()[::-1]
 
             elif target.lower() == "balance":
-                balance = self.client.get_wallet_balance(accountType=self.ACCOUNT_TYPE)
+                balance = self.client.get_wallet_balance(accountType=self.account_type)
                 updating_value = Formater().format_balance(balance)
             else:
                 raise ValueError('Expecting "klines" or "balance" in the target value')
             self.update(target, updating_value)
         except Exception as e:
-            logger.error(e)
+            logger.exception(f"_req_update error: {e}")
 
     def update_balance(self):
         try:
@@ -84,31 +85,30 @@ class GatekeeperStorage(Client):
             logger.error(e)
 
 
-gatekeeper_storage = GatekeeperStorage()
+class Gatekeeper:
 
-
-class Gatekeeper(Client):
-
-    def __init__(self):
-        super().__init__()
+    def __init__(self, gatekeeper_storage: GatekeeperStorage, symbol: str, interval: int):
+        self.gatekeeper_storage = gatekeeper_storage
+        self.symbol = symbol
+        self.interval = interval
         self.ws = WebSocket(channel_type="spot", testnet=False)
         self.ws.kline_stream(
             interval=self.interval, symbol=self.symbol, callback=self.klines_callback
         )
 
     def klines_callback(self, kline: dict):
-        storage = gatekeeper_storage.get()
+        storage = self.gatekeeper_storage.get()
         new_kline = list(Formater().format_new_kline(kline).values())
 
         if len(storage["klines"]) == 0 or new_kline[-1] == True:
-            gatekeeper_storage.update_klines()
+            self.gatekeeper_storage.update_klines()
             return
         if len(storage["balance"]) == 0:
-            gatekeeper_storage.update_balance()
+            self.gatekeeper_storage.update_balance()
             return
 
         klines_list = storage["klines"]
         klines_list.pop()
         klines_list.append(new_kline[:-1])
-        gatekeeper_storage.update("klines", klines_list)
+        self.gatekeeper_storage.update("klines", klines_list)
         logger.debug("Last kline was updated")

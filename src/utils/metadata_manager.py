@@ -4,7 +4,8 @@ from utils.journal_manager import JournalManager
 
 
 class MetaManager:
-    def __init__(self):
+    def __init__(self, journal: JournalManager):
+        self.journal = journal
         self.path = "metadata.json"
 
     def get(self) -> dict:
@@ -26,12 +27,12 @@ class MetaManager:
         self.update("last_action", data)
 
     def update_actual(self) -> None:
-        orders = JournalManager().get()["orders"]
+        orders = self.journal.get()["orders"]
         data = {
             "orders_amount": len(orders),
             "avg_order_price": sum(orders) / (len(orders) if len(orders) != 0 else 1),
-            "closest_s_line": JournalManager().get()["sell_lines"][0],
-            "closest_a_line": JournalManager().get()["buy_lines"][0],
+            "closest_s_line": self.journal.get()["sell_lines"][0],
+            "closest_a_line": self.journal.get()["buy_lines"][0],
         }
         self.update("actual", data)
 

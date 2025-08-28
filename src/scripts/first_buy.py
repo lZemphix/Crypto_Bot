@@ -1,21 +1,31 @@
 import time
+from utils.journal_manager import JournalManager
+from utils.telenotify import Telenotify
 from utils.lines_manager import LinesManager
-from client.base import BotBase
-from client.orders import get_orders
+from client.orders import Orders
 from utils.metadata_manager import MetaManager
 from utils.triggers import IndicatorTrigger
 from logging import getLogger
 from data.consts import FIRST_BUY_MESSAGE
-from utils.gatekeeper import gatekeeper_storage
+from utils.gatekeeper import GatekeeperStorage
 
 
 logger = getLogger(__name__)
 
 
-class Checkup(BotBase):
+class Checkup:
 
-    def __init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        gatekeeper_storage: GatekeeperStorage,
+        journal: JournalManager,
+        telenotify: Telenotify,
+        amount_buy: float
+    ) -> None:
+        self.gatekeeper_storage = gatekeeper_storage
+        self.journal = journal
+        self.amount_buy = amount_buy
+        self.telenotify = telenotify
 
     def update_journal(self, last_order: float) -> None:
         data = self.journal.get()
@@ -25,16 +35,22 @@ class Checkup(BotBase):
         self.journal.update(data)
 
     def valid_balance(self) -> None:
-        return gatekeeper_storage.get_balance()["USDT"] > self.amount_buy
+        return self.gatekeeper_storage.get_balance()["USDT"] > self.amount_buy
 
 
-class Notifier(Checkup):
-    def __init__(self):
-        super().__init__()
+class Notifier:
+    def __init__(
+        self,
+        telenotify: Telenotify,
+        gatekeeper_storage: GatekeeperStorage,
+        journal: JournalManager,):
+        self.telenotify = telenotify
+        self.gatekeeper_storage = gatekeeper_storage
+        self.journal = journal
 
     def send_buy_notify(self, last_order: float) -> None:
-        gatekeeper_storage.update_balance()
-        balance = gatekeeper_storage.get_balance()["USDT"]
+        self.gatekeeper_storage.update_balance()
+        balance = self.gatekeeper_storage.get_balance()["USDT"]
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
 
@@ -51,32 +67,45 @@ class Notifier(Checkup):
         )
 
 
-class FirstBuy(Checkup):
+class FirstBuy:
 
-    def __init__(self):
-        super().__init__()
-        self.trigger = IndicatorTrigger()
-        self.lines = LinesManager()
+    def __init__(
+        self, 
+        checkup: Checkup,
+        trigger: IndicatorTrigger,
+        gatekeeper_storage: GatekeeperStorage,
+        orders: Orders,
+        lines: LinesManager,
+        metamanager: MetaManager,
+        notifier: Notifier
+        ) -> None:
+        self.checkup = checkup
+        self.trigger = trigger
+        self.gatekeeper_storage = gatekeeper_storage
+        self.orders = orders
+        self.lines = lines
+        self.metamanager = metamanager
+        self.notifier = notifier
 
     def activate(self) -> bool:
-        if self.valid_balance():
+        if self.checkup.valid_balance():
             logger.info("Trying to do first buy")
             if self.trigger.rsi_trigger():
                 logger.debug("rsi trigger")
-                gatekeeper_storage.update_balance()
-                if get_orders.place_buy_order():
+                self.gatekeeper_storage.update_balance()
+                if self.orders.place_buy_order():
                     logger.info("Buy order placed successfully")
                     time.sleep(2)
                     last_order = float(
-                        get_orders.get_order_history()[0].get("avgPrice")
+                        self.orders.get_order_history()[0].get("avgPrice")
                     )
                     logger.debug(f"Last order price: {last_order}")
                     if self.lines.write_lines(last_order):
                         logger.debug("Lines written successfully")
-                        Notifier().send_buy_notify(last_order)
+                        self.notifier.send_buy_notify(last_order)
                         logger.debug("Notification sent for first buy")
-                        self.update_journal(last_order)
+                        self.checkup.update_journal(last_order)
                         logger.debug("Journal updated with new order")
-                        MetaManager().update_all(type="first_buy")
+                        self.metamanager.update_all(type="first_buy")
                         logger.debug("Metadata was writed")
                         return True

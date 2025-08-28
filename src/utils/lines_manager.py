@@ -7,8 +7,8 @@ logger = getLogger(__name__)
 
 class LinesManager:
 
-    def __init__(self):
-        self.journal = JournalManager()
+    def __init__(self, journal: JournalManager):
+        self.journal = journal
 
     def write_lines(self, order_price: float) -> bool:
         data = self.journal.get()

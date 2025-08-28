@@ -7,8 +7,8 @@ class Base(DeclarativeBase):
     pass
 
 
-class Statistic(Base):
-    __tablename__ = "statistic"
+class Actions(Base):
+    __tablename__ = "actions"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     date: Mapped[datetime] = mapped_column(default=datetime.now())

@@ -1,6 +1,6 @@
 from logging import getLogger
-from utils.gatekeeper import gatekeeper_storage
-from client.base import BotBase
+from utils.gatekeeper import GatekeeperStorage
+from utils.journal_manager import JournalManager
 from utils.klines_manager import KlinesManager
 import ta.momentum
 
@@ -8,10 +8,10 @@ import ta.momentum
 logger = getLogger(__name__)
 
 
-class IndicatorTrigger(BotBase):
-    def __init__(self):
-        super().__init__()
-        self.klines = KlinesManager()
+class IndicatorTrigger:
+    def __init__(self, RSI: float, klines_manager: KlinesManager):
+        self.klines = klines_manager
+        self.RSI = RSI
 
     def rsi_trigger(self) -> bool:
         try:
@@ -23,13 +23,16 @@ class IndicatorTrigger(BotBase):
             return False
 
 
-class CrossKlinesTrigger(BotBase):
+class CrossKlinesTrigger:
 
-    def __init__(self):
-        super().__init__()
+    def __init__(
+        self, gatekeeper_storage: GatekeeperStorage, journal_manager: JournalManager
+    ):
+        self.journal = journal_manager
+        self.gatekeeper_storage = gatekeeper_storage
 
     def get_klines(self) -> tuple[float, float]:
-        klines = gatekeeper_storage.get_klines()
+        klines = self.gatekeeper_storage.get_klines()
         current_kline = float(klines[-1][4])
         prev_kline = float(klines[-2][4])
         return current_kline, prev_kline
@@ -56,12 +59,13 @@ class CrossKlinesTrigger(BotBase):
         return False
 
 
-class BalanceTrigger(BotBase):
-    def __init__(self):
-        super().__init__()
+class BalanceTrigger:
+    def __init__(self, gatekeeper_storage: GatekeeperStorage, amount_buy: float):
+        self.amount_buy = amount_buy
+        self.gatekeeper_storage = gatekeeper_storage
 
     def invalid_balance(self) -> bool:
         logger.debug("checking balance")
-        balance = gatekeeper_storage.get_balance()["USDT"]
+        balance = self.gatekeeper_storage.get_balance()["USDT"]
         if balance < self.amount_buy:
             return True

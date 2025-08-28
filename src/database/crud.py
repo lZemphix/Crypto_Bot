@@ -1,24 +1,25 @@
-import datetime
 from logging import getLogger
-from .core import sync_session, engine
-from .models import Statistic, Base
+
+from .schemas import ActionType
+from .core import sync_session
+from .models import Actions
 from sqlalchemy import select
 
 logger = getLogger(__name__)
 
 
-class StatisticTable:
+class ActionsTable:
 
     @staticmethod
-    def add_statistic(balance: float, actions: int = 0, profit: float = 0):
+    def add_action(action_type: ActionType, pil: float):
         with sync_session() as conn:
-            statistic = Statistic(balance=balance, actions=actions, profit=profit)
-            conn.add(statistic)
+            action = Actions(action_type=action_type, pil=pil)
+            conn.add(action)
             conn.commit()
 
     @staticmethod
-    def get_all_statistic():
+    def get_all_actions():
         with sync_session() as conn:
-            stmt = select(Statistic)
-            statistic = conn.execute(stmt)
-            return statistic.scalars().all()
+            stmt = select(Actions)
+            action = conn.execute(stmt)
+            return action.scalars().all()
