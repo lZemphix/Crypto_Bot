@@ -1,4 +1,3 @@
-
 from unittest.mock import patch, MagicMock
 from utils.gatekeeper import Formater, GatekeeperStorage, Gatekeeper
 
@@ -14,7 +13,7 @@ def test_formater_format_new_kline():
                 "close": "105",
                 "turnover": "105000",
                 "confirm": True,
-                "extra": "data"
+                "extra": "data",
             }
         ]
     }
@@ -26,7 +25,7 @@ def test_formater_format_new_kline():
         "low": "90",
         "close": "105",
         "turnover": "105000",
-        "confirm": True
+        "confirm": True,
     }
     assert formated == expected
 
@@ -38,7 +37,7 @@ def test_formater_format_balance():
                 {
                     "coin": [
                         {"coin": "USDT", "walletBalance": "1000.0"},
-                        {"coin": "BTC", "walletBalance": "0.5"}
+                        {"coin": "BTC", "walletBalance": "0.5"},
                     ]
                 }
             ]
@@ -58,8 +57,8 @@ def test_gatekeeper_storage():
     assert storage.get_klines() == [1, 2, 3]
 
 
-@patch('utils.gatekeeper.get_klines')
-@patch.object(GatekeeperStorage, 'update')
+@patch("utils.gatekeeper.get_klines")
+@patch.object(GatekeeperStorage, "update")
 def test_gatekeeper_storage_req_update_klines(mock_update, mock_get_klines):
     mock_get_klines.get_klines.return_value = [3, 2, 1]
     storage = GatekeeperStorage()
@@ -67,18 +66,20 @@ def test_gatekeeper_storage_req_update_klines(mock_update, mock_get_klines):
     mock_update.assert_called_once_with("klines", [1, 2, 3])
 
 
-@patch.object(GatekeeperStorage, 'update')
+@patch.object(GatekeeperStorage, "update")
 def test_gatekeeper_storage_req_update_balance(mock_update):
     storage = GatekeeperStorage()
     storage.client = MagicMock()
     storage.client.get_wallet_balance.return_value = "raw_balance"
-    with patch('utils.gatekeeper.Formater.format_balance', return_value={"USDT": 120}) as mock_format:
+    with patch(
+        "utils.gatekeeper.Formater.format_balance", return_value={"USDT": 120}
+    ) as mock_format:
         storage._GatekeeperStorage__req_update("balance")
         mock_format.assert_called_once_with("raw_balance")
         mock_update.assert_called_once_with("balance", {"USDT": 120})
 
 
-@patch.object(GatekeeperStorage, '_GatekeeperStorage__req_update')
+@patch.object(GatekeeperStorage, "_GatekeeperStorage__req_update")
 def test_gatekeeper_storage_update_methods(mock_req_update):
     storage = GatekeeperStorage()
     storage.update_balance()
@@ -87,9 +88,9 @@ def test_gatekeeper_storage_update_methods(mock_req_update):
     mock_req_update.assert_called_with("klines")
 
 
-@patch('utils.gatekeeper.gatekeeper_storage')
-@patch('utils.gatekeeper.Formater')
-@patch('utils.gatekeeper.WebSocket')
+@patch("utils.gatekeeper.gatekeeper_storage")
+@patch("utils.gatekeeper.Formater")
+@patch("utils.gatekeeper.WebSocket")
 def test_gatekeeper_klines_callback(mock_ws, mock_formater, mock_storage):
     gatekeeper = Gatekeeper()
     mock_formater_instance = mock_formater.return_value

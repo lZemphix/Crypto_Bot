@@ -1,4 +1,3 @@
-
 from unittest.mock import patch, MagicMock, mock_open
 import json
 import pytest
@@ -10,17 +9,11 @@ from utils.exceptions import (
 )
 
 
-@patch("builtins.open", new_callable=mock_open, read_data=json.dumps({"symbol": "BTCUSDT"}))
+@patch(
+    "builtins.open", new_callable=mock_open, read_data=json.dumps({"symbol": "BTCUSDT"})
+)
 def test_checkup_get_accuracy(mock_file):
-    mock_info = {
-        "result": {
-            "list": [
-                {
-                    "lotSizeFilter": {"minOrderQty": "0.0001"}
-                }
-            ]
-        }
-    }
+    mock_info = {"result": {"list": [{"lotSizeFilter": {"minOrderQty": "0.0001"}}]}}
     checkup = Checkup()
     checkup.client = MagicMock()
     checkup.client.get_instruments_info.return_value = mock_info
@@ -52,7 +45,7 @@ def test_orders_get_open_orders():
         orders.get_open_orders()
 
 
-@patch('client.orders.get_bot_config', return_value=100)
+@patch("client.orders.get_bot_config", return_value=100)
 def test_orders_place_buy_order(mock_config):
     orders = Orders()
     orders.client = MagicMock()
@@ -65,8 +58,8 @@ def test_orders_place_buy_order(mock_config):
     assert result is False
 
 
-@patch('client.orders.gatekeeper_storage')
-@patch.object(Orders, 'get_accuracy', return_value=5)
+@patch("client.orders.gatekeeper_storage")
+@patch.object(Orders, "get_accuracy", return_value=5)
 def test_orders_place_sell_order(mock_get_accuracy, mock_storage):
     mock_storage.get_balance.return_value = {"BTC": 0.123456789}
     orders = Orders()
@@ -75,7 +68,7 @@ def test_orders_place_sell_order(mock_get_accuracy, mock_storage):
     result = orders.place_sell_order()
     assert result is True
     orders.client.place_order.assert_called_with(
-        category='spot', symbol='BTCUSDT', side='Sell', orderType='Market', qty='0.123'
+        category="spot", symbol="BTCUSDT", side="Sell", orderType="Market", qty="0.123"
     )
 
     orders.client.place_order.side_effect = Exception("Test Error")

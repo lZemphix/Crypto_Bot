@@ -13,7 +13,7 @@ router = APIRouter()
 async def index(request: Request):
     with open("bot_config.json") as f:
         conf = json.load(f)
-    with open('metadata.json') as f:
+    with open("metadata.json") as f:
         metadata = json.load(f)
     coin_name = conf["symbol"].replace("USDT", "")
     balance = get_balance()

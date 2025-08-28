@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock
 from client.klines import Klines
 
@@ -6,11 +5,7 @@ from client.klines import Klines
 def test_klines_get_klines_success():
     klines = Klines()
     klines.client = MagicMock()
-    mock_response = {
-        "result": {
-            "list": [1, 2, 3]
-        }
-    }
+    mock_response = {"result": {"list": [1, 2, 3]}}
     klines.client.get_kline.return_value = mock_response
     result = klines.get_klines()
     assert result == [1, 2, 3]

@@ -1,15 +1,14 @@
-
 from unittest.mock import patch, MagicMock
 from utils.lines_manager import LinesManager
 
 
-@patch('utils.lines_manager.get_bot_config')
-@patch('utils.lines_manager.JournalManager')
+@patch("utils.lines_manager.get_bot_config")
+@patch("utils.lines_manager.JournalManager")
 def test_lines_manager_create_lines_no_orders(mock_jm, mock_config):
     mock_journal_instance = MagicMock()
     mock_jm.return_value = mock_journal_instance
     mock_journal_instance.get.return_value = {"orders": []}
-    mock_config.side_effect = lambda key: 0.5 if key == 'stepBuy' else 0.6
+    mock_config.side_effect = lambda key: 0.5 if key == "stepBuy" else 0.6
 
     lm = LinesManager()
     sell_lines, buy_lines = lm.create_lines(100.0)
@@ -20,13 +19,13 @@ def test_lines_manager_create_lines_no_orders(mock_jm, mock_config):
     assert buy_lines[0] == round(100.0 - 0.5 * 1, 3)
 
 
-@patch('utils.lines_manager.get_bot_config')
-@patch('utils.lines_manager.JournalManager')
+@patch("utils.lines_manager.get_bot_config")
+@patch("utils.lines_manager.JournalManager")
 def test_lines_manager_create_lines_with_orders(mock_jm, mock_config):
     mock_journal_instance = MagicMock()
     mock_jm.return_value = mock_journal_instance
     mock_journal_instance.get.return_value = {"orders": [90, 110]}
-    mock_config.side_effect = lambda key: 0.5 if key == 'stepBuy' else 0.6
+    mock_config.side_effect = lambda key: 0.5 if key == "stepBuy" else 0.6
 
     lm = LinesManager()
     sell_lines, buy_lines = lm.create_lines(100.0)
@@ -38,11 +37,15 @@ def test_lines_manager_create_lines_with_orders(mock_jm, mock_config):
     assert buy_lines[0] == round(100.0 - 0.5 * 1, 3)
 
 
-@patch('utils.lines_manager.JournalManager')
+@patch("utils.lines_manager.JournalManager")
 def test_lines_manager_write_lines(mock_jm):
     mock_journal_instance = MagicMock()
     mock_jm.return_value = mock_journal_instance
-    mock_journal_instance.get.return_value = {"orders": [], "sell_lines": [], "buy_lines": []}
+    mock_journal_instance.get.return_value = {
+        "orders": [],
+        "sell_lines": [],
+        "buy_lines": [],
+    }
 
     lm = LinesManager()
     # Mocking create_lines to isolate write_lines functionality

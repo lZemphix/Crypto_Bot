@@ -1,4 +1,3 @@
-
 import pytest
 from utils.exceptions import (
     NoCryptoCurrencyException,
@@ -40,6 +39,3 @@ def test_sell_state():
     assert SellState.WAITING
     assert SellState.PRICE_CORRECT
     assert SellState.STOPPED
-
-
-

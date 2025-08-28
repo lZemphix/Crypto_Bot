@@ -13,15 +13,16 @@ def help():
     print(CMX_HELP)
 
 
-def buy(): 
+def buy():
     order_price = sys.argv[1]
-    orders = data['orders']
+    orders = data["orders"]
     orders.append(order_price)
     LinesManager().write_lines(orders / len(orders))
     data = JournalManager().get()
-    data['orders'] = orders
+    data["orders"] = orders
     JournalManager().update(data)
-    print('Fake buy was added')
+    print("Fake buy was added")
+
 
 def main():
     args = sys.argv[1:]

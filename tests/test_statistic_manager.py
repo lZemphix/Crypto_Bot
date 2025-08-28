@@ -1,18 +1,17 @@
-
 from unittest.mock import patch, MagicMock
 import datetime
 from utils.statistic_manager import DateManager, StatisticManager
 
 
-@patch('utils.statistic_manager.StatisticTable')
+@patch("utils.statistic_manager.StatisticTable")
 def test_date_manager_date_delta_no_stats(mock_stats_table):
     mock_stats_table.return_value.get_all_statistic.return_value = []
     dm = DateManager()
     assert dm.date_delta() is True
 
 
-@patch('utils.statistic_manager.StatisticTable')
-@patch('utils.statistic_manager.datetime')
+@patch("utils.statistic_manager.StatisticTable")
+@patch("utils.statistic_manager.datetime")
 def test_date_manager_date_delta_older_than_day(mock_datetime, mock_stats_table):
     last_stat = MagicMock()
     last_stat.date = datetime.datetime(2023, 1, 1)
@@ -23,8 +22,8 @@ def test_date_manager_date_delta_older_than_day(mock_datetime, mock_stats_table)
     assert dm.date_delta() is True
 
 
-@patch('utils.statistic_manager.StatisticTable')
-@patch('utils.statistic_manager.datetime')
+@patch("utils.statistic_manager.StatisticTable")
+@patch("utils.statistic_manager.datetime")
 def test_date_manager_date_delta_within_day(mock_datetime, mock_stats_table):
     last_stat = MagicMock()
     last_stat.date = datetime.datetime(2023, 1, 1, 12, 0, 0)
@@ -35,8 +34,8 @@ def test_date_manager_date_delta_within_day(mock_datetime, mock_stats_table):
     assert dm.date_delta() is False
 
 
-@patch('utils.statistic_manager.StatisticTable')
-@patch.object(DateManager, 'date_delta', return_value=True)
+@patch("utils.statistic_manager.StatisticTable")
+@patch.object(DateManager, "date_delta", return_value=True)
 def test_statistic_manager_add_statistic_true(mock_date_delta, mock_stats_table):
     sm = StatisticManager()
     sm.add_statistic(1000.0, 5, 50.0)
@@ -45,8 +44,8 @@ def test_statistic_manager_add_statistic_true(mock_date_delta, mock_stats_table)
     )
 
 
-@patch('utils.statistic_manager.StatisticTable')
-@patch.object(DateManager, 'date_delta', return_value=False)
+@patch("utils.statistic_manager.StatisticTable")
+@patch.object(DateManager, "date_delta", return_value=False)
 def test_statistic_manager_add_statistic_false(mock_date_delta, mock_stats_table):
     sm = StatisticManager()
     sm.add_statistic(1000.0, 5, 50.0)

@@ -1,5 +1,3 @@
-
-
 import json
 
 from data.consts import SETTINGS_MENU

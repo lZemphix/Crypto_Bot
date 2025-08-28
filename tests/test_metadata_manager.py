@@ -1,4 +1,3 @@
-
 import json
 from unittest.mock import patch, mock_open, MagicMock
 import datetime
@@ -16,7 +15,9 @@ def test_meta_manager_get(mock_file):
 @patch("builtins.open", new_callable=mock_open)
 @patch("json.dump")
 def test_meta_manager_update(mock_json_dump, mock_file):
-    with patch.object(MetaManager, 'get', return_value={"target": "old_data"}) as mock_get:
+    with patch.object(
+        MetaManager, "get", return_value={"target": "old_data"}
+    ) as mock_get:
         mm = MetaManager()
         mm.update("target", "new_data")
         mock_get.assert_called_once()
@@ -24,8 +25,8 @@ def test_meta_manager_update(mock_json_dump, mock_file):
         mock_json_dump.assert_called_with({"target": "new_data"}, mock_file(), indent=4)
 
 
-@patch.object(MetaManager, 'update')
-@patch('datetime.datetime')
+@patch.object(MetaManager, "update")
+@patch("datetime.datetime")
 def test_meta_manager_update_last_action(mock_dt, mock_update):
     fake_now = datetime.datetime(2023, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc)
     mock_dt.now.return_value = fake_now
@@ -41,14 +42,14 @@ def test_meta_manager_update_last_action(mock_dt, mock_update):
     mock_update.assert_called_once_with("last_action", expected_data)
 
 
-@patch('utils.metadata_manager.JournalManager')
-@patch.object(MetaManager, 'update')
+@patch("utils.metadata_manager.JournalManager")
+@patch.object(MetaManager, "update")
 def test_meta_manager_update_actual(mock_update, mock_jm):
     mock_journal_instance = MagicMock()
     mock_journal_instance.get.return_value = {
         "orders": [90, 110],
         "sell_lines": [120, 130],
-        "buy_lines": [80, 70]
+        "buy_lines": [80, 70],
     }
     mock_jm.return_value = mock_journal_instance
 
@@ -64,8 +65,8 @@ def test_meta_manager_update_actual(mock_update, mock_jm):
     mock_update.assert_called_once_with("actual", expected_data)
 
 
-@patch.object(MetaManager, 'update_last_action')
-@patch.object(MetaManager, 'update_actual')
+@patch.object(MetaManager, "update_last_action")
+@patch.object(MetaManager, "update_actual")
 def test_meta_manager_update_all(mock_update_actual, mock_update_last_action):
     mm = MetaManager()
     mm.update_all("SELL")
