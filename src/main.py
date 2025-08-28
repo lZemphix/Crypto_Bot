@@ -1,10 +1,8 @@
 from logging import getLogger
-import logging
 import sys
 from scripts.bot import Bot
 from config.logger_config import load_logger_config
 from data.consts import *
-import traceback
 
 import random
 from utils.telenotify import Telenotify
@@ -13,21 +11,15 @@ logger = getLogger(__name__)
 
 
 def main():
-
-    load_logger_config(20)
     logger.info('bot was activated. Press "ctrl + c" for stop')
-    logging.getLogger("_http_manager").setLevel(30)
-    logging.getLogger("urllib3").setLevel(30)
-    logging.getLogger("requests").setLevel(30)
-
     try:
+        load_logger_config(10)
         Bot().activate()
     except KeyboardInterrupt:
         sys.exit(0)
     except Exception as e:
         err_id = random.randint(1_000_000, 9_999_999)
-        traceback.print_exception(type(e), e, e.__traceback__)
-        logger.error(f"Error id: {err_id}. Message:{e}")
+        logger.exception(f"Error id: {err_id}. Message: {e}")
         Telenotify().error(CRUSH_MESSAGE.format(error_id=err_id))
 
 
