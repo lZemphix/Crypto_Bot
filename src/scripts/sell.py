@@ -13,10 +13,7 @@ logger = getLogger(__name__)
 class Checkup:
 
     def __init__(
-        self,
-        gatekeeper_storage: GatekeeperStorage,
-        orders: Orders,
-        step_sell: float
+        self, gatekeeper_storage: GatekeeperStorage, orders: Orders, step_sell: float
     ) -> None:
         self.gatekeeper_storage = gatekeeper_storage
         self.orders = orders
@@ -36,14 +33,14 @@ class Notifier:
         coin_name: str,
         gatekeeper_storage: GatekeeperStorage,
         journal: JournalManager,
-        orders: Orders
-        ) -> None:
+        orders: Orders,
+    ) -> None:
         self.telenotify = telenotify
         self.gatekeeper_storage = gatekeeper_storage
         self.journal = journal
         self.coin_name = coin_name
         self.orders = orders
-        
+
     def send_buy_notify(self):
         last_order = self.orders.get_order_history()[0]
         last_order_price = float(last_order["avgPrice"])
@@ -63,8 +60,8 @@ class Sell:
         gatekeeper_storage: GatekeeperStorage,
         orders: Orders,
         notifier: Notifier,
-        metamanager: MetaManager
-        ) -> None:
+        metamanager: MetaManager,
+    ) -> None:
         self.journal = journal
         self.trigger = trigger
         self.checkup = checkup
@@ -74,18 +71,17 @@ class Sell:
         self.metamanager = metamanager
 
     def activate(self) -> bool:
-        logger.info("Trying to close positions")
         if self.checkup.price_valid():
             logger.debug("Price valid for sell")
             if self.trigger.cross_up_to_down():
                 logger.debug("Trigger cross_up_to_down activated")
-                self.gatekeeper_storage.update_balance()
-                if self.orders.place_sell_order():
-                    logger.info("Sell order placed successfully")
-                    time.sleep(2)
-                    self.notifier.send_buy_notify()
-                    logger.info("Notification sent for sell")
-                    self.metamanager.update_all(type="sell")
-                    self.journal.clear()
-                    logger.info("Journal cleared after sell")
-                    return True
+                if self.gatekeeper_storage.update_balance():
+                    if self.orders.place_sell_order():
+                        logger.info("Sell order placed successfully")
+                        time.sleep(2)
+                        self.notifier.send_buy_notify()
+                        logger.info("Notification sent for sell")
+                        self.metamanager.update_all(type="sell")
+                        self.journal.clear()
+                        logger.info("Journal cleared after sell")
+                        return True

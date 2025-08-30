@@ -87,7 +87,9 @@ class GatekeeperStorage:
 
 class Gatekeeper:
 
-    def __init__(self, gatekeeper_storage: GatekeeperStorage, symbol: str, interval: int):
+    def __init__(
+        self, gatekeeper_storage: GatekeeperStorage, symbol: str, interval: int
+    ):
         self.gatekeeper_storage = gatekeeper_storage
         self.symbol = symbol
         self.interval = interval

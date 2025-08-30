@@ -26,7 +26,14 @@ class Checkup:
 
 
 class Orders(Checkup):
-    def __init__(self, client: HTTP, symbol: str, journal: JournalManager, gatekeeper_storage: GatekeeperStorage, amount_buy: float):
+    def __init__(
+        self,
+        client: HTTP,
+        symbol: str,
+        journal: JournalManager,
+        gatekeeper_storage: GatekeeperStorage,
+        amount_buy: float,
+    ):
         super().__init__(client=client, symbol=symbol)
         self.journal = journal
         self.gatekeeper_storage = gatekeeper_storage

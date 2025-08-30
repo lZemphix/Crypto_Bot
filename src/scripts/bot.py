@@ -4,13 +4,26 @@ from client.orders import Orders
 from scripts.averaging import Averaging
 from scripts.first_buy import FirstBuy
 from scripts.sell import Sell
+
+from scripts.first_buy import Checkup as FBCheckup
+from scripts.averaging import Checkup as AVGCheckup
+from scripts.sell import Checkup as SCheckup
+
+from scripts.first_buy import Notifier as FBNotifier
+from scripts.averaging import Notifier as AVGNotifier
+from scripts.sell import Notifier as SNotifier
+
 from utils.journal_manager import JournalManager
 from utils.telenotify import Telenotify
 from utils.gatekeeper import Gatekeeper, GatekeeperStorage
 from utils.states import BotState
-from utils.triggers import BalanceTrigger
+from utils.triggers import BalanceTrigger, IndicatorTrigger, CrossKlinesTrigger
 from data.consts import *
 import time
+from client.klines import Klines
+from utils.klines_manager import KlinesManager
+from utils.lines_manager import LinesManager
+from utils.metadata_manager import MetaManager
 
 
 logger = getLogger(__name__)
@@ -28,11 +41,7 @@ def initial_update(gatekeeper_storage: GatekeeperStorage):
 
 
 class Price:
-    def __init__( 
-        self, 
-        orders: Orders, 
-        gatekeeper_storage: GatekeeperStorage
-        ) -> None:
+    def __init__(self, orders: Orders, gatekeeper_storage: GatekeeperStorage) -> None:
         self.orders = orders
         self.gatekeeper_storage = gatekeeper_storage
 
@@ -43,21 +52,21 @@ class Price:
             price = float(self.gatekeeper_storage.get_klines()[-1][4])
             logger.debug("out Price.get_price_side")
             return round(price - avg_order, 3)
-        except TypeError:
-            logger.warning("TypeError. Return 0")
+        except (TypeError, ValueError):
+            logger.warning("TypeError or ValueError. Return 0")
             return 0
 
 
 class Notifier:
-    def __init__( 
-        self, 
+    def __init__(
+        self,
         gatekeeper_storage: GatekeeperStorage,
         telenotify: Telenotify,
         interval: int,
         amount_buy: float,
         symbol: str,
-        coin_name: str
-        ):
+        coin_name: str,
+    ):
         self.gatekeeper_storage = gatekeeper_storage
         self.interval = interval
         self.amount_buy = amount_buy
@@ -71,7 +80,9 @@ class Notifier:
         interval = self.interval
         amount_buy = self.amount_buy
         try:
-            coin_balance = f"{self.gatekeeper_storage.get_balance()[self.coin_name]:.10f}"
+            coin_balance = (
+                f"{self.gatekeeper_storage.get_balance()[self.coin_name]:.10f}"
+            )
         except:
             coin_balance = 0.00
         self.telenotify.bot_status(
@@ -90,7 +101,7 @@ class Notifier:
         logger.debug("enter Notifier.send_nem_notify")
         usdt_balance = round(self.gatekeeper_storage.get_balance()["USDT"], 3)
         self.telenotify.warning(
-            f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {self.amount_buy}```"
+            f"Not enough money!```\nBalance: {usdt_balance}\nMin order price: {self.amount_buy}"
         )
         logger.warning(
             f"Not enough money! Balance: {usdt_balance}. Min order price: {self.amount_buy}"
@@ -100,7 +111,8 @@ class Notifier:
 
 class States:
 
-    def __init__(self,
+    def __init__(
+        self,
         balance_trigger: BalanceTrigger,
         first_buy: FirstBuy,
         averaging: Averaging,
@@ -108,8 +120,8 @@ class States:
         notifier: Notifier,
         journal: JournalManager,
         price: Price,
-        gatekeeper_storage: GatekeeperStorage
-        ) -> None:
+        gatekeeper_storage: GatekeeperStorage,
+    ) -> None:
         self.balance_trigger = balance_trigger
         self.first_buy = first_buy
         self.averaging = averaging
@@ -180,8 +192,8 @@ class Bot:
         states: States,
         balance_trigger: BalanceTrigger,
         gatekeeper: Gatekeeper,
-        gatekeeper_storage: GatekeeperStorage
-        ) -> None:
+        gatekeeper_storage: GatekeeperStorage,
+    ) -> None:
         self.current_state = BotState.WAITING
         self.notifier = notifier
         self.states = states
@@ -191,7 +203,7 @@ class Bot:
 
     def activate(self):
         logger.debug("enter Bot.activate")
-        self.gatekeeper 
+        self.gatekeeper
         if not initial_update(self.gatekeeper_storage):
             raise SystemExit("Can't do initial update")
         self.notifier.send_activate_notify()
@@ -201,16 +213,179 @@ class Bot:
             time.sleep(1)
 
             if self.balance_trigger.invalid_balance():
-                current_state = self.states.insufficient_balance_state()
+                self.current_state = self.states.insufficient_balance_state()
 
-            if current_state == BotState.WAITING:
-                current_state = self.states.waiting_state()
+            if self.current_state.value == BotState.WAITING.value:
+                self.current_state = self.states.waiting_state()
 
-            if current_state == BotState.AVERAGING:
-                current_state = self.states.averaging_state()
+            if self.current_state.value == BotState.AVERAGING.value:
+                self.current_state = self.states.averaging_state()
 
-            if current_state == BotState.SELL:
-                current_state = self.states.sell_state()
+            if self.current_state.value == BotState.SELL.value:
 
-            if current_state == BotState.FIRST_BUY:
-                current_state = self.states.first_buy_state()
+                self.current_state = self.states.sell_state()
+
+            if self.current_state.value == BotState.FIRST_BUY.value:
+                self.current_state = self.states.first_buy_state()
+
+
+def activate():
+    # Load settings
+    bot_config = bot_settings
+    env_config = env_settings
+
+    # Initialize core components
+    client = env_config.get_client
+    journal_manager = JournalManager()
+    telenotify = Telenotify(status=bot_config.send_notify)
+
+    # Initialize Klines and GatekeeperStorage
+    klines_client = Klines(
+        client=client, symbol=bot_config.symbol, interval=bot_config.interval
+    )
+    gatekeeper_storage = GatekeeperStorage(
+        klines=klines_client, client=client, account_type=env_config.ACCOUNT_TYPE
+    )
+
+    # Initialize Gatekeeper
+    gatekeeper = Gatekeeper(
+        gatekeeper_storage=gatekeeper_storage,
+        symbol=bot_config.symbol,
+        interval=bot_config.interval,
+    )
+
+    # Initialize Orders
+    orders = Orders(
+        client=client,
+        symbol=bot_config.symbol,
+        journal=journal_manager,
+        gatekeeper_storage=gatekeeper_storage,
+        amount_buy=bot_config.amountBuy,
+    )
+
+    # Initialize KlinesManager
+    klines_manager = KlinesManager(gatekeeper_storage=gatekeeper_storage)
+
+    # Initialize LinesManager and MetaManager
+    lines_manager = LinesManager(journal=journal_manager)
+    meta_manager = MetaManager(journal=journal_manager)
+
+    # Initialize Triggers
+    balance_trigger = BalanceTrigger(
+        gatekeeper_storage=gatekeeper_storage, amount_buy=bot_config.amountBuy
+    )
+    indicator_trigger = IndicatorTrigger(
+        RSI=bot_config.RSI, klines_manager=klines_manager
+    )
+    cross_klines_trigger = CrossKlinesTrigger(
+        gatekeeper_storage=gatekeeper_storage, journal_manager=journal_manager
+    )
+
+    # Initialize Price
+    price = Price(orders=orders, gatekeeper_storage=gatekeeper_storage)
+
+    # Initialize FirstBuy components
+    first_buy_checkup = FBCheckup(
+        gatekeeper_storage=gatekeeper_storage,
+        journal=journal_manager,
+        telenotify=telenotify,
+        amount_buy=bot_config.amountBuy,
+    )
+    first_buy_notifier = FBNotifier(
+        telenotify=telenotify,
+        gatekeeper_storage=gatekeeper_storage,
+        journal=journal_manager,
+    )
+    first_buy = FirstBuy(
+        checkup=first_buy_checkup,
+        trigger=indicator_trigger,
+        gatekeeper_storage=gatekeeper_storage,
+        orders=orders,
+        lines=lines_manager,
+        metamanager=meta_manager,
+        notifier=first_buy_notifier,
+    )
+
+    # Initialize Averaging components
+    averaging_checkup = AVGCheckup(
+        gatekeeper_storage=gatekeeper_storage,
+        orders=orders,
+        journal=journal_manager,
+        amount_buy=bot_config.amountBuy,
+        step_buy=bot_config.stepBuy,
+    )
+    averaging_notifier = AVGNotifier(
+        telenotify=telenotify,
+        gatekeeper_storage=gatekeeper_storage,
+        journal=journal_manager,
+    )
+    averaging = Averaging(
+        lines=lines_manager,
+        checkup=averaging_checkup,
+        trigger=cross_klines_trigger,
+        gatekeeper_storage=gatekeeper_storage,
+        orders=orders,
+        metamanager=meta_manager,
+        notifier=averaging_notifier,
+    )
+
+    # Initialize Sell components
+    sell_checkup = SCheckup(
+        gatekeeper_storage=gatekeeper_storage,
+        orders=orders,
+        step_sell=bot_config.stepSell,
+    )
+    sell_notifier = SNotifier(
+        telenotify=telenotify,
+        coin_name=bot_config.symbol.replace(
+            "USDT", ""
+        ),  # Assuming coin_name can be derived this way
+        gatekeeper_storage=gatekeeper_storage,
+        journal=journal_manager,
+        orders=orders,
+    )
+    sell = Sell(
+        journal=journal_manager,
+        trigger=cross_klines_trigger,
+        checkup=sell_checkup,
+        gatekeeper_storage=gatekeeper_storage,
+        orders=orders,
+        notifier=sell_notifier,
+        metamanager=meta_manager,
+    )
+
+    # Initialize main Notifier (for Bot class)
+    main_notifier = Notifier(
+        gatekeeper_storage=gatekeeper_storage,
+        telenotify=telenotify,
+        interval=bot_config.interval,
+        amount_buy=bot_config.amountBuy,
+        symbol=bot_config.symbol,
+        coin_name=bot_config.symbol.replace(
+            "USDT", ""
+        ),  # Assuming coin_name can be derived this way
+    )
+
+    # Initialize States
+    states = States(
+        balance_trigger=balance_trigger,
+        first_buy=first_buy,
+        averaging=averaging,
+        sell=sell,
+        notifier=main_notifier,
+        journal=journal_manager,
+        price=price,
+        gatekeeper_storage=gatekeeper_storage,
+    )
+
+    # Initialize Bot
+    bot = Bot(
+        notifier=main_notifier,
+        states=states,
+        balance_trigger=balance_trigger,
+        gatekeeper=gatekeeper,
+        gatekeeper_storage=gatekeeper_storage,
+    )
+
+    # Activate the bot
+    bot.activate()

@@ -20,22 +20,39 @@ class Checkup:
         gatekeeper_storage: GatekeeperStorage,
         journal: JournalManager,
         telenotify: Telenotify,
-        amount_buy: float
+        amount_buy: float,
     ) -> None:
         self.gatekeeper_storage = gatekeeper_storage
         self.journal = journal
         self.amount_buy = amount_buy
         self.telenotify = telenotify
 
-    def update_journal(self, last_order: float) -> None:
+    def update_orders_journal(self, last_order: float) -> bool:
+        """Add new order in trade_journal['orders']"""
+        if not isinstance(last_order, int | float):
+            raise TypeError(
+                f"Argument last_order must be 'int' or 'float', not '{type(last_order).__name__}'"
+            )
         data = self.journal.get()
         orders = data["orders"]
         orders.append(last_order)
         data["orders"] = orders
         self.journal.update(data)
+        return True
 
-    def valid_balance(self) -> None:
-        return self.gatekeeper_storage.get_balance()["USDT"] > self.amount_buy
+    def valid_balance(self) -> bool:
+        balance = self.gatekeeper_storage.get_balance()["USDT"]
+        if not isinstance(balance, int | float):
+            raise TypeError(
+                f"Balance have a invalid type. Must be 'int' or 'float', not '{type(balance).__name__}'"
+            )
+        if not isinstance(self.amount_buy, float):
+            raise TypeError(
+                f"configs param have a invalid type. Must be 'float', not '{type(self.amount_buy).__name__}'"
+            )
+        
+
+        return balance > self.amount_buy
 
 
 class Notifier:
@@ -43,42 +60,63 @@ class Notifier:
         self,
         telenotify: Telenotify,
         gatekeeper_storage: GatekeeperStorage,
-        journal: JournalManager,):
+        journal: JournalManager,
+    ):
         self.telenotify = telenotify
         self.gatekeeper_storage = gatekeeper_storage
         self.journal = journal
 
     def send_buy_notify(self, last_order: float) -> None:
         self.gatekeeper_storage.update_balance()
-        balance = self.gatekeeper_storage.get_balance()["USDT"]
+        balance = self.gatekeeper_storage.get_balance()
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
 
-        logger.info(
-            f"First buy for ${last_order}. Balance: {balance}. Min price for sell: ${min_sell_price}. Min price for averate: ${min_buy_price}"
-        )
-        self.telenotify.bought(
-            FIRST_BUY_MESSAGE.format(
-                buy_price=last_order,
-                balance=balance,
-                sell_line=min_sell_price,
-                buy_line=min_buy_price,
+        if not isinstance(last_order, int | float):
+            raise TypeError(
+                f"Argument last_order must be 'int' or 'float', not '{type(last_order).__name__}'"
             )
-        )
+        if not balance or balance == {}:
+            raise AttributeError("Balance is empty!")
+        if not "USDT" in balance.keys():
+            raise KeyError('Gatekeeper do not contains key named "USDT"')
+        if not isinstance(min_sell_price, float | int):
+            raise TypeError(
+                f"Sell lines must be list[float], not '{type(min_sell_price).__name__}'"
+            )
+        if not isinstance(min_buy_price, float | int):
+            raise TypeError(
+                f"Buy lines must be list[float], not '{type(min_buy_price).__name__}'"
+            )
+        try:
+            logger.info(
+                f"First buy for ${last_order}. Balance: {balance["USDT"]}. Min price for sell: ${min_sell_price}. Min price for averate: ${min_buy_price}"
+            )
+            self.telenotify.bought(
+                FIRST_BUY_MESSAGE.format(
+                    buy_price=last_order,
+                    balance=balance["USDT"],
+                    sell_line=min_sell_price,
+                    buy_line=min_buy_price,
+                )
+            )
+        except Exception as e:
+            logger.exception(e)
+        return True
 
 
 class FirstBuy:
 
     def __init__(
-        self, 
+        self,
         checkup: Checkup,
         trigger: IndicatorTrigger,
         gatekeeper_storage: GatekeeperStorage,
         orders: Orders,
         lines: LinesManager,
         metamanager: MetaManager,
-        notifier: Notifier
-        ) -> None:
+        notifier: Notifier,
+    ) -> None:
         self.checkup = checkup
         self.trigger = trigger
         self.gatekeeper_storage = gatekeeper_storage
@@ -89,23 +127,22 @@ class FirstBuy:
 
     def activate(self) -> bool:
         if self.checkup.valid_balance():
-            logger.info("Trying to do first buy")
+            logger.info("valid_balance")
             if self.trigger.rsi_trigger():
                 logger.debug("rsi trigger")
-                self.gatekeeper_storage.update_balance()
-                if self.orders.place_buy_order():
-                    logger.info("Buy order placed successfully")
-                    time.sleep(2)
-                    last_order = float(
-                        self.orders.get_order_history()[0].get("avgPrice")
-                    )
-                    logger.debug(f"Last order price: {last_order}")
-                    if self.lines.write_lines(last_order):
+                if self.gatekeeper_storage.update_balance():
+                    if self.orders.place_buy_order():
+                        logger.info("Buy order placed successfully")
+                        time.sleep(2)
+                        last_order = float(
+                            self.orders.get_order_history()[0].get("avgPrice")
+                        )
+                        self.checkup.update_orders_journal(last_order)
+                        logger.debug("Journal updated with new order")
+                        self.lines.write_lines(last_order)
                         logger.debug("Lines written successfully")
                         self.notifier.send_buy_notify(last_order)
                         logger.debug("Notification sent for first buy")
-                        self.checkup.update_journal(last_order)
-                        logger.debug("Journal updated with new order")
                         self.metamanager.update_all(type="first_buy")
                         logger.debug("Metadata was writed")
                         return True

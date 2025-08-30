@@ -1,6 +1,6 @@
 from logging import getLogger
 import sys
-from scripts.bot import Bot
+from scripts.bot import activate
 from config.logger_config import load_logger_config
 from data.consts import *
 
@@ -14,7 +14,7 @@ def main():
     load_logger_config(10)
     logger.info('bot was activated. Press "ctrl + c" for stop')
     try:
-        Bot().activate()
+        activate()
     except KeyboardInterrupt:
         sys.exit(0)
     except Exception as e:
