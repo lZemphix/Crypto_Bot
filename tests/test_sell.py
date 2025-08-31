@@ -137,3 +137,58 @@ class TestSell:
     @pytest.fixture
     def mock_metamanager(self):
         return MagicMock()
+
+    @pytest.fixture
+    def mock_journal(self):
+        return MagicMock()
+
+    @patch("src.scripts.sell.time.sleep")
+    @pytest.mark.parametrize(
+        "valid_price, cross_up_to_down, place_buy_order, last_order, expect",
+        [
+            (True, True, True, 10.0, True),
+        ],
+    )
+    def test_activate(
+        self,
+        mock_sleep,
+        mock_checkup,
+        mock_trigger,
+        mock_gatekeeper_storage,
+        mock_orders,
+        mock_metamanager,
+        mock_notifier,
+        mock_journal,
+        valid_price,
+        cross_up_to_down,
+        place_buy_order,
+        last_order,
+        expect,
+    ):
+        mock_checkup.valid_price.return_value = valid_price
+        mock_trigger.rsi_trigger.return_value = cross_up_to_down
+        mock_gatekeeper_storage.update_balance.return_value = True
+        mock_orders.place_buy_order.return_value = place_buy_order
+        mock_orders.get_order_history.return_value = [{"avgPrice": last_order}]
+
+        sell = Sell(
+            mock_journal,
+            mock_trigger,
+            mock_checkup,
+            mock_gatekeeper_storage,
+            mock_orders,
+            mock_notifier,
+            mock_metamanager,
+        )
+
+        result = sell.activate()
+
+        assert result == expect
+
+        mock_checkup.valid_price.assert_called_once()
+        mock_trigger.cross_up_to_down.assert_called_once()
+        mock_gatekeeper_storage.update_balance.assert_called_once
+        mock_orders.place_sell_order.assert_called_once()
+        mock_journal.clear.assert_called_once()
+        mock_notifier.send_sell_notify.assert_called_once()
+        mock_metamanager.update_all.assert_called_once_with(type="sell")
