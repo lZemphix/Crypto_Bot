@@ -162,7 +162,7 @@ class TestNotifier:
         buy_lines,
         balance,
     ):
-        
+
         mock_gatekeeper_storage.get_balance.return_value = balance
         mock_telenotify.bought.return_value = 200
         mock_journal.get.return_value = {
@@ -209,12 +209,12 @@ class TestAveraging:
     @pytest.fixture
     def mock_metamanager(self):
         return MagicMock()
-    
+
     @pytest.fixture
     def mock_valid_price(self):
         return MagicMock()
 
-    @patch('src.scripts.averaging.time.sleep')
+    @patch("src.scripts.averaging.time.sleep")
     @pytest.mark.parametrize(
         "valid_balance, cross_down_to_up, valid_price, update_balance, place_buy_order, last_order, expect",
         [
@@ -237,14 +237,14 @@ class TestAveraging:
         place_buy_order,
         update_balance,
         last_order,
-        expect
+        expect,
     ):
         mock_checkup.valid_balance.return_value = valid_balance
         mock_checkup.valid_price.return_value = valid_price
         mock_trigger.cross_down_to_up.return_value = cross_down_to_up
         mock_gatekeeper_storage.update_balance.return_value = update_balance
         mock_orders.place_buy_order.return_value = place_buy_order
-        
+
         mock_orders.get_order_history.return_value = [{"avgPrice": last_order}]
 
         averaging = Averaging(

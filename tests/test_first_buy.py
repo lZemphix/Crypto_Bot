@@ -17,7 +17,7 @@ class TestCheckup:
     @pytest.fixture
     def mock_gatekeeper_storage(self):
         return MagicMock()
-    
+
     @pytest.fixture
     def mock_telenotify(self):
         return MagicMock()
@@ -48,7 +48,6 @@ class TestCheckup:
     ):
         mock_gatekeeper_storage.get_balance.return_value = balance
 
-
         checkup = Checkup(
             mock_gatekeeper_storage,
             mock_journal,
@@ -61,8 +60,6 @@ class TestCheckup:
                 assert checkup.valid_balance()
         else:
             assert checkup.valid_balance() == expect
-
-
 
     @pytest.mark.parametrize(
         "last_order, expect",
@@ -92,10 +89,11 @@ class TestCheckup:
                 assert checkup.update_orders_journal(last_order=last_order)
         else:
             checkup.update_orders_journal(last_order=last_order)
-            expected_message = {"orders": [10.0, 11.0, last_order],}
+            expected_message = {
+                "orders": [10.0, 11.0, last_order],
+            }
             mock_journal.get.assert_called_once()
             mock_journal.update.assert_called_once_with(expected_message)
-
 
 
 class TestNotifier:
@@ -151,11 +149,11 @@ class TestNotifier:
         else:
             notify.send_buy_notify(last_order=last_order)
             expected_message = FIRST_BUY_MESSAGE.format(
-                    buy_price=last_order,
-                    balance=balance["USDT"],
-                    sell_line=sell_lines[0],
-                    buy_line=buy_lines[0],
-                )
+                buy_price=last_order,
+                balance=balance["USDT"],
+                sell_line=sell_lines[0],
+                buy_line=buy_lines[0],
+            )
             mock_telenotify.bought.assert_called_once()
             mock_telenotify.bought.assert_called_once_with(expected_message)
 
@@ -189,8 +187,8 @@ class TestFirstBuy:
     @pytest.fixture
     def mock_metamanager(self):
         return MagicMock()
-    
-    @patch('src.scripts.first_buy.time.sleep')
+
+    @patch("src.scripts.first_buy.time.sleep")
     @pytest.mark.parametrize(
         "valid_balance, rsi_trigger, write_lines, place_buy_order, last_order, expect",
         [
@@ -212,13 +210,12 @@ class TestFirstBuy:
         place_buy_order,
         last_order,
         write_lines,
-        expect
+        expect,
     ):
         mock_checkup.valid_balance.return_value = valid_balance
         mock_trigger.rsi_trigger.return_value = rsi_trigger
-        mock_orders.place_buy_order.return_value = place_buy_order        
+        mock_orders.place_buy_order.return_value = place_buy_order
         mock_orders.get_order_history.return_value = [{"avgPrice": last_order}]
-        
 
         first_buy = FirstBuy(
             checkup=mock_checkup,

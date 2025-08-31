@@ -50,7 +50,6 @@ class Checkup:
             raise TypeError(
                 f"configs param have a invalid type. Must be 'float', not '{type(self.amount_buy).__name__}'"
             )
-        
 
         return balance > self.amount_buy
 

@@ -230,16 +230,13 @@ class Bot:
 
 
 def activate():
-    # Load settings
     bot_config = bot_settings
     env_config = env_settings
 
-    # Initialize core components
     client = env_config.get_client
     journal_manager = JournalManager()
     telenotify = Telenotify(status=bot_config.send_notify)
 
-    # Initialize Klines and GatekeeperStorage
     klines_client = Klines(
         client=client, symbol=bot_config.symbol, interval=bot_config.interval
     )
@@ -247,14 +244,12 @@ def activate():
         klines=klines_client, client=client, account_type=env_config.ACCOUNT_TYPE
     )
 
-    # Initialize Gatekeeper
     gatekeeper = Gatekeeper(
         gatekeeper_storage=gatekeeper_storage,
         symbol=bot_config.symbol,
         interval=bot_config.interval,
     )
 
-    # Initialize Orders
     orders = Orders(
         client=client,
         symbol=bot_config.symbol,
@@ -263,14 +258,11 @@ def activate():
         amount_buy=bot_config.amountBuy,
     )
 
-    # Initialize KlinesManager
     klines_manager = KlinesManager(gatekeeper_storage=gatekeeper_storage)
 
-    # Initialize LinesManager and MetaManager
     lines_manager = LinesManager(journal=journal_manager)
     meta_manager = MetaManager(journal=journal_manager)
 
-    # Initialize Triggers
     balance_trigger = BalanceTrigger(
         gatekeeper_storage=gatekeeper_storage, amount_buy=bot_config.amountBuy
     )
@@ -281,10 +273,8 @@ def activate():
         gatekeeper_storage=gatekeeper_storage, journal_manager=journal_manager
     )
 
-    # Initialize Price
     price = Price(orders=orders, gatekeeper_storage=gatekeeper_storage)
 
-    # Initialize FirstBuy components
     first_buy_checkup = FBCheckup(
         gatekeeper_storage=gatekeeper_storage,
         journal=journal_manager,
@@ -306,7 +296,6 @@ def activate():
         notifier=first_buy_notifier,
     )
 
-    # Initialize Averaging components
     averaging_checkup = AVGCheckup(
         gatekeeper_storage=gatekeeper_storage,
         orders=orders,
@@ -329,7 +318,6 @@ def activate():
         notifier=averaging_notifier,
     )
 
-    # Initialize Sell components
     sell_checkup = SCheckup(
         gatekeeper_storage=gatekeeper_storage,
         orders=orders,
@@ -337,11 +325,8 @@ def activate():
     )
     sell_notifier = SNotifier(
         telenotify=telenotify,
-        coin_name=bot_config.symbol.replace(
-            "USDT", ""
-        ),  # Assuming coin_name can be derived this way
+        coin_name=bot_config.symbol.replace("USDT", ""),
         gatekeeper_storage=gatekeeper_storage,
-        journal=journal_manager,
         orders=orders,
     )
     sell = Sell(
@@ -354,7 +339,6 @@ def activate():
         metamanager=meta_manager,
     )
 
-    # Initialize main Notifier (for Bot class)
     main_notifier = Notifier(
         gatekeeper_storage=gatekeeper_storage,
         telenotify=telenotify,
@@ -366,7 +350,6 @@ def activate():
         ),  # Assuming coin_name can be derived this way
     )
 
-    # Initialize States
     states = States(
         balance_trigger=balance_trigger,
         first_buy=first_buy,
@@ -378,7 +361,6 @@ def activate():
         gatekeeper_storage=gatekeeper_storage,
     )
 
-    # Initialize Bot
     bot = Bot(
         notifier=main_notifier,
         states=states,
@@ -387,5 +369,4 @@ def activate():
         gatekeeper_storage=gatekeeper_storage,
     )
 
-    # Activate the bot
     bot.activate()

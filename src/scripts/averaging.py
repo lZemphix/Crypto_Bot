@@ -80,7 +80,7 @@ class Notifier:
         balance = self.gatekeeper_storage.get_balance()
         min_sell_price = self.journal.get()["sell_lines"][0]
         min_buy_price = self.journal.get()["buy_lines"][0]
-        
+
         if not isinstance(last_order, int | float):
             raise TypeError(
                 f"Argument last_order must be 'int' or 'float', not '{type(last_order).__name__}'"
