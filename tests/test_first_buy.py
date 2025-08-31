@@ -214,18 +214,12 @@ class TestFirstBuy:
         write_lines,
         expect
     ):
-        # 2. ПОЛНАЯ НАСТРОЙКА МОКОВ ДЛЯ УСПЕШНОГО СЦЕНАРИЯ
         mock_checkup.valid_balance.return_value = valid_balance
         mock_trigger.rsi_trigger.return_value = rsi_trigger
-        mock_orders.place_buy_order.return_value = place_buy_order
-        
-        # 3. НАСТРОЙКА ДЛЯ GET_ORDER_HISTORY
+        mock_orders.place_buy_order.return_value = place_buy_order        
         mock_orders.get_order_history.return_value = [{"avgPrice": last_order}]
         
-        # 4. НАСТРОЙКА ДЛЯ WRITE_LINES
-        mock_lines.write_lines.return_value = write_lines
 
-        # Создаем экземпляр класса
         first_buy = FirstBuy(
             checkup=mock_checkup,
             trigger=mock_trigger,
@@ -236,13 +230,10 @@ class TestFirstBuy:
             notifier=mock_notifier,
         )
 
-        # Вызываем тестируемый метод
         result = first_buy.activate()
 
-        # Проверяем, что результат True
         assert result == expect
 
-        # Проверяем, что все нужные методы были вызваны
         mock_checkup.valid_balance.assert_called_once()
         mock_trigger.rsi_trigger.assert_called_once()
         mock_orders.place_buy_order.assert_called_once()

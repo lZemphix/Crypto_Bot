@@ -1,22 +1,22 @@
-# import pytest
-# from unittest.mock import MagicMock, patch
-# from src.scripts.sell import Sell, Checkup, Notifier
-# from utils.exceptions import OrderPlaceException
+import pytest
+from unittest.mock import MagicMock, patch
+from src.scripts.sell import Sell, Checkup, Notifier
+from utils.exceptions import OrderPlaceException
 
 
-# class TestCheckup:
+class TestCheckup:
 
-#     @pytest.fixture
-#     def mock_orders(self):
-#         return MagicMock()
+    @pytest.fixture
+    def mock_orders(self):
+        return MagicMock()
 
-#     @pytest.fixture
-#     def mock_journal(self):
-#         return MagicMock()
+    @pytest.fixture
+    def mock_journal(self):
+        return MagicMock()
 
-#     @pytest.fixture
-#     def mock_gatekeeper_storage(self):
-#         return MagicMock()
+    @pytest.fixture
+    def mock_gatekeeper_storage(self):
+        return MagicMock()
 
 
 #     @pytest.mark.parametrize(

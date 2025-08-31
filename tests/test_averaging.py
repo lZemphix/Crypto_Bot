@@ -210,34 +210,20 @@ class TestAveraging:
     def mock_metamanager(self):
         return MagicMock()
     
+    @pytest.fixture
+    def mock_valid_price(self):
+        return MagicMock()
+
     @patch('src.scripts.averaging.time.sleep')
     @pytest.mark.parametrize(
-        "valid_balance, valid_price, cross_dtu, update_balance, place_buy_order, update_orders_journal, write_lines, update_all, send_averaging_notify, expect",
+        "valid_balance, cross_down_to_up, valid_price, update_balance, place_buy_order, last_order, expect",
         [
-            (True, True, True, True, True, True, True, True, True, True),
-            (False, True, True, True, True, True, True, True, True, None),
-            (True, False, True, True, True, True, True, True, True, None),
-            (True, True, False, True, True, True, True, True, True, None),
-            (True, True, True, False, True, True, True, True, True, None),
-            (True, True, True, True, False, True, True, True, True, None),
-            (True, True, True, True, True, False, True, True, True, True),
-            (True, True, True, True, True, True, False, True, True, True),
-            (True, True, True, True, True, True, True, False, True, True),
-            (True, True, True, True, True, True, True, True, False, True),
+            (True, True, True, True, True, 10.0, True),
         ],
     )
     def test_activate(
         self,
         mock_sleep,
-        valid_balance,
-        valid_price,
-        cross_dtu,
-        update_balance,
-        place_buy_order,
-        update_orders_journal,
-        write_lines,
-        update_all,
-        send_averaging_notify,
         mock_checkup,
         mock_trigger,
         mock_gatekeeper_storage,
@@ -245,32 +231,42 @@ class TestAveraging:
         mock_lines,
         mock_metamanager,
         mock_notifier,
-        expect,
+        valid_balance,
+        valid_price,
+        cross_down_to_up,
+        place_buy_order,
+        update_balance,
+        last_order,
+        expect
     ):
         mock_checkup.valid_balance.return_value = valid_balance
         mock_checkup.valid_price.return_value = valid_price
-        mock_checkup.update_orders_journal.return_value = update_orders_journal
-        mock_trigger.cross_down_to_up.return_value = cross_dtu
+        mock_trigger.cross_down_to_up.return_value = cross_down_to_up
         mock_gatekeeper_storage.update_balance.return_value = update_balance
         mock_orders.place_buy_order.return_value = place_buy_order
-        mock_lines.write_lines.return_value = write_lines
-        mock_metamanager.update_all.return_value = update_all
-        mock_notifier.send_averaging_notify.return_value = send_averaging_notify
+        
+        mock_orders.get_order_history.return_value = [{"avgPrice": last_order}]
 
         averaging = Averaging(
-            mock_lines,
-            mock_checkup,
-            mock_trigger,
-            mock_gatekeeper_storage,
-            mock_orders,
-            mock_metamanager,
-            mock_notifier,
+            checkup=mock_checkup,
+            trigger=mock_trigger,
+            gatekeeper_storage=mock_gatekeeper_storage,
+            orders=mock_orders,
+            lines=mock_lines,
+            metamanager=mock_metamanager,
+            notifier=mock_notifier,
         )
 
-        if isinstance(expect, type) and issubclass(expect, BaseException):
-            with pytest.raises(expect):
-                assert averaging.activate()
-        else:
-            assert averaging.activate() == expect
+        result = averaging.activate()
 
-#TODO: переделать test_activate: добавить проверку на количество вызовов и на переданные парамы
+        assert result == expect
+
+        mock_checkup.valid_balance.assert_called_once()
+        mock_checkup.valid_price.assert_called_once()
+        mock_trigger.cross_down_to_up.assert_called_once()
+        mock_orders.place_buy_order.assert_called_once()
+        mock_lines.write_lines.assert_called_once_with(last_order)
+        mock_checkup.update_orders_journal.assert_called_once_with(last_order)
+        mock_notifier.send_averaging_notify.assert_called_once_with(last_order)
+        mock_checkup.update_orders_journal.assert_called_once_with(last_order)
+        mock_metamanager.update_all.assert_called_once_with(type="average")
