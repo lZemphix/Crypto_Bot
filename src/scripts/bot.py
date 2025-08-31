@@ -347,7 +347,7 @@ def activate():
         symbol=bot_config.symbol,
         coin_name=bot_config.symbol.replace(
             "USDT", ""
-        ),  # Assuming coin_name can be derived this way
+        ),
     )
 
     states = States(
