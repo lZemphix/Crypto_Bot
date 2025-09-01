@@ -11,7 +11,17 @@
     },
     "previous_actions":
     {
-        "sell_actions":[],
-        "buy_actions":[]
+        "sell_actions":[
+            {
+                "datetime": "2025-11-19 21:27:56",
+                "price": 1023.12
+            }
+        ],
+        "buy_actions":[
+            {
+                "datetime": "2025-11-19 21:27:51",
+                "price": 1023.12
+            }
+        ]
     }
 }
