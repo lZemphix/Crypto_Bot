@@ -1,8 +1,9 @@
 import json
 import os
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv, set_key
+from utils.auth import verify
 
 load_dotenv()
 
@@ -11,7 +12,7 @@ templates = Jinja2Templates(directory="web/templates")
 router = APIRouter(prefix="/settings")
 
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(verify)])
 async def settings(request: Request):
     with open("bot_config.json") as f:
         context = json.load(f)
