@@ -1,27 +1,31 @@
 {
     "last_action": {
-        "type": "",
-        "date": ""
+        "type": "first_buy",
+        "date": "2025-09-01 20:51:10"
     },
     "actual": {
-        "orders_amount": 0,
-        "avg_order_price": 0,
-        "closest_s_line": 0,
-        "closest_a_line": 0
+        "orders_amount": 1,
+        "avg_order_price": 108802.0,
+        "closest_s_line": 109502.0,
+        "closest_a_line": 108052.0
     },
-    "previous_actions":
-    {
-        "sell_actions":[
+    "previous_actions": {
+        "sell_actions": [
             {
-                "datetime": "2025-11-19 21:27:56",
+                "datetime": "2025-08-01 21:27:56",
                 "price": 1023.12
             }
         ],
-        "buy_actions":[
+        "buy_actions": [
             {
-                "datetime": "2025-11-19 21:27:51",
+                "datetime": "2025-07-19 21:27:51",
                 "price": 1023.12
-            }
+            },
+            {
+                "datetime": "2025-07-31 21:27:51",
+                "price": 1001.21
+            },
+            108802.0
         ]
     }
 }

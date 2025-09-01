@@ -11,6 +11,8 @@ services:
       API_KEY: ${API_KEY}
       BOT_TOKEN: ${BOT_TOKEN}
       CHAT_ID: ${CHAT_ID}
+      USERNAME: ${USERNAME}
+      PASSWORD: ${PASSWORD}
     volumes:
       - ./logs.log:/app/logs.log
       - ./metadata.json:/app/metadata.json
@@ -30,6 +32,8 @@ services:
       API_KEY: ${API_KEY}
       USERNAME: ${USERNAME}
       PASSWORD: ${PASSWORD}
+      BOT_TOKEN: ${BOT_TOKEN}
+      CHAT_ID: ${CHAT_ID}
     volumes:
       - ./bot_config.json:/app/bot_config.json
       - ./metadata.json:/app/metadata.json

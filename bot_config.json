@@ -2,7 +2,7 @@
     "symbol": "BTCUSDT",
     "interval": 5,
     "amountBuy": 5.5,
-    "RSI": 41,
+    "RSI": 1,
     "stepBuy": 750.0,
     "stepSell": 700.0,
     "send_notify": true

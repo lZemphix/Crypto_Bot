@@ -3,8 +3,7 @@ from typing import List
 from client.orders import Orders
 from logging import getLogger
 
-from src.utils.telenotify import Telenotify
-from utils.exceptions import OrderPlaceException
+from utils.telenotify import Telenotify
 from utils.gatekeeper import GatekeeperStorage
 from utils.journal_manager import JournalManager
 from utils.lines_manager import LinesManager

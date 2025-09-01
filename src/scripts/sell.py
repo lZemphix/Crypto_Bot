@@ -1,7 +1,7 @@
 from logging import getLogger
 import time
 from client.orders import Orders
-from src.utils.telenotify import Telenotify
+from utils.telenotify import Telenotify
 from utils.gatekeeper import GatekeeperStorage
 from utils.journal_manager import JournalManager
 from utils.metadata_manager import MetaManager
