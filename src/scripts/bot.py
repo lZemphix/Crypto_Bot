@@ -72,28 +72,29 @@ class Notifier:
         self.symbol = symbol
         self.coin_name = coin_name
 
-    def send_activate_notify(self):
+    def send_activate_notify(self) -> bool:
         logger.debug("enter Notifier.send_activate_notify")
         usdt_balance = round(self.gatekeeper_storage.get_balance()["USDT"], 3)
-        interval = self.interval
-        amount_buy = self.amount_buy
         try:
             coin_balance = (
                 f"{self.gatekeeper_storage.get_balance()[self.coin_name]:.10f}"
             )
         except:
             coin_balance = 0.00
-        self.telenotify.bot_status(
+        status_code = self.telenotify.bot_status(
             BOT_STARTED_MESSAGE.format(
                 symbol=self.symbol,
                 usdt_balance=usdt_balance,
                 coin_name=self.coin_name,
                 coin_balance=coin_balance,
-                interval=interval,
-                amount_buy=amount_buy,
+                interval=self.interval,
+                amount_buy=self.amount_buy,
             )
         )
         logger.debug("out Notifier.send_activate_notify")
+        if status_code == 200:
+            return True
+        return False
 
     def send_nem_notify(self):
         logger.debug("enter Notifier.send_nem_notify")
