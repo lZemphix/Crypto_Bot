@@ -142,6 +142,6 @@ class FirstBuy:
                         logger.debug("Lines written successfully")
                         self.notifier.send_buy_notify(last_order)
                         logger.debug("Notification sent for first buy")
-                        self.metamanager.update_all(type="first_buy")
+                        self.metamanager.update_all(type="first_buy", value=last_order)
                         logger.debug("Metadata was writed")
                         return True

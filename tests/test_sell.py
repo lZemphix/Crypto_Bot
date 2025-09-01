@@ -71,12 +71,12 @@ class TestNotifier:
     @pytest.mark.parametrize(
             "balance, last_order, expect",
             [
-                ({"USDT": 12.0}, 10.0, True), #       Ok
-                (None, 10.0, AttributeError),#        balance == None
-                ([], 10.0, AttributeError),#          balance == list
-                ({}, 10.0, AttributeError),#          balance == empty dict
+                ({"USDT": 12.0}, {'avgPrice': '10.0', 'cumExecQty': '0.01'}, True), #       Ok
+                (None, {'avgPrice': '10.0', 'cumExecQty': '0.01'}, AttributeError),#        balance == None
+                ([], {'avgPrice': '10.0', 'cumExecQty': '0.01'}, AttributeError),#          balance == list
+                ({}, {'avgPrice': '10.0', 'cumExecQty': '0.01'}, AttributeError),#          balance == empty dict
                 ({"USDT": 12.0}, None, TypeError),#  last_order == None
-                ({"12": 12.0}, 10.0,  KeyError),#      balance not contains USDT
+                ({"12": 12.0}, {'avgPrice': '10.0', 'cumExecQty': '0.01'},  KeyError),#      balance not contains USDT
             ]
     )    
     # fmt: on
@@ -89,11 +89,9 @@ class TestNotifier:
         expect,
         balance,
     ):
-        coin_qty = 0.1
+        coin_qty = 0.01
         coin_name = "ETH"
-        mock_orders.get_order_history.return_value = [
-            {"avgPrice": last_order, "cumExecQty": coin_qty}
-        ]
+        mock_orders.get_order_history.return_value = last_order
         mock_telenotify.bought.return_value = 200
         mock_gatekeeper_storage.get_balance.return_value = balance
         notify = Notifier(
@@ -101,10 +99,12 @@ class TestNotifier:
         )
         if isinstance(expect, type) and issubclass(expect, BaseException):
             with pytest.raises(expect):
-                assert notify.send_sell_notify()
+                assert notify.send_sell_notify(last_order=last_order)
+
         else:
-            notify.send_sell_notify()
-            expected_message = f"Bot was sold```\n{coin_qty:.10f} {coin_name} for {last_order}.\nTotal: price: {coin_qty*last_order}\nBalance: {balance}```"
+            notify.send_sell_notify(last_order=last_order)
+            avg_price = float(last_order["avgPrice"])
+            expected_message = f"Bot was sold```\n{coin_qty:.10f} {coin_name} for {avg_price}.\nTotal: price: {coin_qty*avg_price}\nBalance: {balance}```"
             mock_telenotify.sold.assert_called_once_with(expected_message)
 
 
@@ -165,6 +165,7 @@ class TestSell:
         last_order,
         expect,
     ):
+        value = 10.0
         mock_checkup.valid_price.return_value = valid_price
         mock_trigger.rsi_trigger.return_value = cross_up_to_down
         mock_gatekeeper_storage.update_balance.return_value = True
@@ -191,4 +192,4 @@ class TestSell:
         mock_orders.place_sell_order.assert_called_once()
         mock_journal.clear.assert_called_once()
         mock_notifier.send_sell_notify.assert_called_once()
-        mock_metamanager.update_all.assert_called_once_with(type="sell")
+        mock_metamanager.update_all.assert_called_once_with(type="sell", value=value)

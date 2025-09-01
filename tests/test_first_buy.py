@@ -237,4 +237,6 @@ class TestFirstBuy:
         mock_lines.write_lines.assert_called_once_with(last_order)
         mock_notifier.send_buy_notify.assert_called_once_with(last_order)
         mock_checkup.update_orders_journal.assert_called_once_with(last_order)
-        mock_metamanager.update_all.assert_called_once_with(type="first_buy")
+        mock_metamanager.update_all.assert_called_once_with(
+            type="first_buy", value=last_order
+        )

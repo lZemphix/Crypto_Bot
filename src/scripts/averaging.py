@@ -148,7 +148,9 @@ class Averaging:
                             logger.debug("Journal updated with new order")
                             self.lines.write_lines(float(last_order))
                             logger.debug("Lines written successfully")
-                            self.metamanager.update_all(type="average")
+                            self.metamanager.update_all(
+                                type="average", value=last_order
+                            )
                             logger.debug("Metadata was writed")
                             self.notifier.send_averaging_notify(last_order)
                             return True

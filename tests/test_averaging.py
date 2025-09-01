@@ -269,4 +269,6 @@ class TestAveraging:
         mock_checkup.update_orders_journal.assert_called_once_with(last_order)
         mock_notifier.send_averaging_notify.assert_called_once_with(last_order)
         mock_checkup.update_orders_journal.assert_called_once_with(last_order)
-        mock_metamanager.update_all.assert_called_once_with(type="average")
+        mock_metamanager.update_all.assert_called_once_with(
+            type="average", value=last_order
+        )

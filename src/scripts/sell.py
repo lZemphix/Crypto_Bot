@@ -39,8 +39,7 @@ class Notifier:
         self.coin_name = coin_name
         self.orders = orders
 
-    def send_sell_notify(self):
-        last_order = self.orders.get_order_history()[0]
+    def send_sell_notify(self, last_order: dict):
         last_order_price = float(last_order["avgPrice"])
         coin_qty = float(last_order["cumExecQty"])
         balance = self.gatekeeper_storage.get_balance()
@@ -86,11 +85,14 @@ class Sell:
                 logger.debug("Trigger cross_up_to_down activated")
                 if self.gatekeeper_storage.update_balance():
                     if self.orders.place_sell_order():
+                        last_order = self.orders.get_order_history()[0]
                         logger.info("Sell order placed successfully")
                         time.sleep(2)
                         self.notifier.send_sell_notify()
                         logger.info("Notification sent for sell")
-                        self.metamanager.update_all(type="sell")
+                        self.metamanager.update_all(
+                            type="sell", value=float(last_order["avgPrice"])
+                        )
                         self.journal.clear()
                         logger.info("Journal cleared after sell")
                         return True

@@ -8,5 +8,10 @@
         "avg_order_price": 0,
         "closest_s_line": 0,
         "closest_a_line": 0
+    },
+    "previous_actions":
+    {
+        "sell_actions":[],
+        "buy_actions":[]
     }
 }
