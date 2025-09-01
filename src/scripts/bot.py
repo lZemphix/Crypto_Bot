@@ -1,6 +1,8 @@
 from logging import getLogger
 from config.config import bot_settings, env_settings
+from client.klines import Klines
 from client.orders import Orders
+
 from scripts.averaging import Averaging
 from scripts.first_buy import FirstBuy
 from scripts.sell import Sell
@@ -19,11 +21,10 @@ from utils.gatekeeper import Gatekeeper, GatekeeperStorage
 from utils.states import BotState
 from utils.triggers import BalanceTrigger, IndicatorTrigger, CrossKlinesTrigger
 from data.consts import *
-import time
-from client.klines import Klines
 from utils.klines_manager import KlinesManager
 from utils.lines_manager import LinesManager
 from utils.metadata_manager import MetaManager
+import time
 
 
 logger = getLogger(__name__)
@@ -48,13 +49,10 @@ class Price:
     def get_price_side(self):
         logger.debug("enter Price.get_price_side")
         avg_order = self.orders.get_avg_order()
-        try:
-            price = float(self.gatekeeper_storage.get_klines()[-1][4])
-            logger.debug("out Price.get_price_side")
-            return round(price - avg_order, 3)
-        except (TypeError, ValueError):
-            logger.warning("TypeError or ValueError. Return 0")
-            return 0
+        klines = self.gatekeeper_storage.get_klines()
+        price = float(klines[-1][4])
+        logger.debug("out Price.get_price_side")
+        return round(price - avg_order, 3)
 
 
 class Notifier:
@@ -345,9 +343,7 @@ def activate():
         interval=bot_config.interval,
         amount_buy=bot_config.amountBuy,
         symbol=bot_config.symbol,
-        coin_name=bot_config.symbol.replace(
-            "USDT", ""
-        ),
+        coin_name=bot_config.symbol.replace("USDT", ""),
     )
 
     states = States(
