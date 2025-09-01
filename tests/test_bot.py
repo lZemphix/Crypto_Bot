@@ -202,3 +202,34 @@ class TestStates:
         mock_price.get_price_side.return_value = price_side
         result = states.waiting_state()
         assert result.value == exp.value
+
+    @pytest.mark.parametrize("activate_result", [True, False])
+    def test_averaging_state(
+        self,
+        mock_averaging,
+        mock_gatekeeper_storage,
+        mock_balance_trigger,
+        mock_first_buy,
+        mock_sell,
+        mock_notifier,
+        mock_journal,
+        mock_price,
+        activate_result,
+    ):
+        states = States(
+            mock_balance_trigger,
+            mock_first_buy,
+            mock_averaging,
+            mock_sell,
+            mock_notifier,
+            mock_journal,
+            mock_price,
+            mock_gatekeeper_storage,
+        )
+        mock_averaging.activate.return_value = activate_result
+        result = states.averaging_state()
+        assert result.value == BotState.WAITING.value
+        if activate_result:
+            mock_gatekeeper_storage.update_balance.assert_called_once()
+        else:
+            mock_gatekeeper_storage.update_balance.assert_not_called()
