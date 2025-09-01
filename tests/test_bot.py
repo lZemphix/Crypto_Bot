@@ -233,3 +233,41 @@ class TestStates:
             mock_gatekeeper_storage.update_balance.assert_called_once()
         else:
             mock_gatekeeper_storage.update_balance.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "activate_result, exp",
+        [
+            (True, BotState.FIRST_BUY),
+            (False, BotState.WAITING),
+        ],
+    )
+    def test_sell_state(
+        self,
+        mock_averaging,
+        mock_gatekeeper_storage,
+        mock_balance_trigger,
+        mock_first_buy,
+        mock_sell,
+        mock_notifier,
+        mock_journal,
+        mock_price,
+        activate_result,
+        exp,
+    ):
+        states = States(
+            mock_balance_trigger,
+            mock_first_buy,
+            mock_averaging,
+            mock_sell,
+            mock_notifier,
+            mock_journal,
+            mock_price,
+            mock_gatekeeper_storage,
+        )
+        mock_sell.activate.return_value = activate_result
+        result = states.sell_state()
+        assert result.value == exp.value
+        if activate_result:
+            mock_gatekeeper_storage.update_balance.assert_called_once()
+        else:
+            mock_gatekeeper_storage.update_balance.assert_not_called()
