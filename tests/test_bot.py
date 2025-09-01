@@ -1,7 +1,8 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from src.data.consts import BOT_STARTED_MESSAGE
 from src.scripts.bot import Price, Notifier, States, Bot
+from utils.states import BotState
 
 
 class TestPrice:
@@ -98,3 +99,106 @@ class TestNotifier:
                 amount_buy=amount_buy,
             )
             mock_telenotify.bot_status.assert_called_once_with(expected_message)
+
+
+class TestStates:
+
+    @pytest.fixture
+    def mock_gatekeeper_storage(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_balance_trigger(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_first_buy(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_averaging(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_sell(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_notifier(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_journal(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_price(self):
+        return MagicMock()
+
+    @patch("src.scripts.bot.time.sleep", return_value=None)
+    def test_insufficient_balance_state_sell_activates(
+        self,
+        mock_sleep,
+        mock_balance_trigger,
+        mock_first_buy,
+        mock_averaging,
+        mock_sell,
+        mock_notifier,
+        mock_journal,
+        mock_price,
+        mock_gatekeeper_storage,
+    ):
+
+        states = States(
+            mock_balance_trigger,
+            mock_first_buy,
+            mock_averaging,
+            mock_sell,
+            mock_notifier,
+            mock_journal,
+            mock_price,
+            mock_gatekeeper_storage,
+        )
+        mock_balance_trigger.invalid_balance.side_effect = [True, True, False]
+        mock_sell.activate.return_value = True
+        result = states.insufficient_balance_state()
+        assert result.value == BotState.FIRST_BUY.value
+        mock_notifier.send_nem_notify.assert_called_once()
+        assert mock_sell.activate.call_count == 1
+
+    @pytest.mark.parametrize(
+        "orders, price_side, exp",
+        [
+            ([], None, BotState.FIRST_BUY),
+            ([10.0, 12.0], 1, BotState.SELL),
+            ([10.0, 12.0], 0, BotState.AVERAGING),
+        ],
+    )
+    def test_waiting_state(
+        self,
+        orders,
+        price_side,
+        mock_journal,
+        mock_price,
+        mock_averaging,
+        mock_balance_trigger,
+        mock_first_buy,
+        mock_sell,
+        mock_notifier,
+        mock_gatekeeper_storage,
+        exp,
+    ):
+        states = States(
+            mock_balance_trigger,
+            mock_first_buy,
+            mock_averaging,
+            mock_sell,
+            mock_notifier,
+            mock_journal,
+            mock_price,
+            mock_gatekeeper_storage,
+        )
+        mock_journal.get.return_value = {"orders": orders}
+        mock_price.get_price_side.return_value = price_side
+        result = states.waiting_state()
+        assert result.value == exp.value
