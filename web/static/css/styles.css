@@ -1,3 +1,13 @@
+:root {
+    --text-color: #ffffff;
+    --background-color: #22263d;
+    --icon-link-element-color: #5b628b;
+    --not-active-text-color: #3a3f5d;
+    --special-element-color: #feae71;
+    --red-color: #bb0000;
+    --green-color: #079000;
+}
+
 html,
 body {
     width: 100%;
@@ -5,50 +15,70 @@ body {
     margin: 0;
     padding: 0;
     font-size: 18px;
-    background-color: #a9a9a9;
+    background-color: var(--background-color);
     font-family: "Bitcount Grid Single", system-ui;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
+    color: var(--text-color);
 }
+
 
 
 header {
-    background-color: #898686;
-    border-bottom: 1px solid #000;
-}
-
-.header-container {
+    background-color: var(--background-colors);
     height: 75px;
-    max-width: 1200px;
+    width: 1000px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 auto; 
+    margin: 0 auto;
 }
 
 .logo {
-    color: #000000;
+    color: var(--text-color);
     font-size: 46px;
+    padding: 8px 16px;
     text-decoration: none;
 }
 
 
 .nav-bar-btn {
-    color: #000000;
+    color: var(--text-color);
     font-size: 20px;
     padding: 8px 16px;
     text-align: center;
     text-decoration: none;
+    transition-duration: 200ms;
+
+    &:hover {
+        color: var(--special-element-color);
+        transition-duration: 200ms;
+        text-shadow: var(--special-element-color) 1px 0 5px;
+    }
 }
 
 main {
     display: flex;
     margin: 0 auto;
-    max-width: 1200px;
-    min-height: 92vh;
-    border-left: 1px solid #000;
-    border-right: 1px solid #000;
+    width: 1000px;
     flex-direction: column;
     flex-grow: 1;
+    margin-top: 40px;
+}
+
+button {
+    min-width: 100px;
+    min-height: 35px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--special-element-color);
+    box-shadow: 0px 0px 15px var(--special-element-color);
+    font-family: "Bitcount Grid Single", system-ui;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    color: var(--background-color);
+    font-size: 20px;
+    margin: 10px;
 }

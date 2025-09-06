@@ -1,91 +1,44 @@
 @import url('styles.css');
 
-.main-container {
+
+tbody {
+    padding: 5px;
+    box-shadow: 0px 0px 15px var(--not-active-text-color);
+    border: 2px solid #000;
+    border-radius: 10px;
     display: flex;
-    margin: 0 auto;  
-    max-width: 1200px;
-    min-height: 92vh;
-    border-left: 1px solid #000;
-    border-right: 1px solid #000;
+    flex-direction: column;
+    background-color: var(--not-active-text-color);
 }
 
-.bot-base-info-container {
-    width: 300px;
-    font-size: 18px;
-}
-
-.bot-info-text {
-    margin-left: 10px;
-}
-
-.bot-info-content {
-    padding: 5px 10px 5px 10px;
-    background-color: #969696;
-    max-width: 275px;
+tr {
     display: flex;
     justify-content: space-between;
-    border: 1px solid #000; 
 }
 
-.status {
-    text-align: right;
-}
-
-.graph-text {
-    margin-left: 10px;
-}
-
-.graph-container {
-    margin-top: 50px;
-    margin-left: 36px;
-}
-
-.tradingview-widget-container {
-    border: 1px solid black
-}
-
-
-.last-action-container {
-    width: 330px;
-    margin: 0px 0px 0px 50px;
-}
-
-.actual-actions-container {
-    width: 400px;
-    margin: 0px 0px 0px 0px;
+.container-header {
+    color: var(--special-element-color);
 }
 
 .bot-info-container {
-    margin-left: 36px;
-    margin-top: 50px;
-    display: flex;
-}
-
-.actions-group {
-    display: flex;
-}
-
-.tag {
-    white-space: nowrap;
-}
-.status {
-    white-space: nowrap;
-
-}
-
-.bot-actions-container {
-    margin: 0px 0px 0px 50px;
-}
-
-.bot-actions-content {
-    padding: 5px 10px 5px 10px;
-    background-color: #969696;
     display: flex;
     justify-content: space-between;
-    border: 1px solid #000; 
 }
 
-.bot-actions-text {
-    margin: 0px 0px 0px 10px;
+.graph-container {
+    margin-top: 30px;
+    
 }
 
+.graph {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    margin-top: 7px;
+    width: 1000px;
+    height: 300px;
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px var(--not-active-text-color);
+}
