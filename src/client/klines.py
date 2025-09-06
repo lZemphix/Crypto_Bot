@@ -1,13 +1,15 @@
 from logging import getLogger
-from client.base import Client
+from pybit.unified_trading import HTTP
 
 logger = getLogger(__name__)
 
 
-class Klines(Client):
+class Klines:
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, client: HTTP, symbol: str, interval: int) -> None:
+        self.client = client
+        self.symbol = symbol
+        self.interval = interval
 
     def get_klines(self, limit: int = 200) -> dict:
         """returns klines dict like {[timetsamp, open, high, low, close, volume, turnover]}"""
@@ -22,6 +24,3 @@ class Klines(Client):
         except Exception as e:
             logger.exception(f"getting klines error! Message: {e}")
             return None
-
-
-get_klines = Klines()

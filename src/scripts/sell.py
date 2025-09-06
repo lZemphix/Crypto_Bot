@@ -1,8 +1,8 @@
 from logging import getLogger
 import time
-from client.base import BotBase
-from client.orders import get_orders
-from utils.gatekeeper import gatekeeper_storage
+from client.orders import Orders
+from utils.telenotify import Telenotify
+from utils.gatekeeper import GatekeeperStorage
 from utils.journal_manager import JournalManager
 from utils.metadata_manager import MetaManager
 from utils.triggers import CrossKlinesTrigger
@@ -10,51 +10,89 @@ from utils.triggers import CrossKlinesTrigger
 logger = getLogger(__name__)
 
 
-class Checkup(BotBase):
+class Checkup:
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(
+        self, gatekeeper_storage: GatekeeperStorage, orders: Orders, step_sell: float
+    ) -> None:
+        self.gatekeeper_storage = gatekeeper_storage
+        self.orders = orders
+        self.step_sell = step_sell
 
-    def price_valid(self):
-        actual_price = float(gatekeeper_storage.get_klines()[-2][4])
-        sell_price = get_orders.get_avg_order() + self.stepSell
+    def valid_price(self):
+        actual_price = float(self.gatekeeper_storage.get_klines()[-1][4])
+        sell_price = self.orders.get_avg_order() + self.step_sell
         return actual_price >= sell_price
 
 
-class Notifier(Checkup):
+class Notifier:
 
-    def __init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        telenotify: Telenotify,
+        coin_name: str,
+        gatekeeper_storage: GatekeeperStorage,
+        orders: Orders,
+    ) -> None:
+        self.telenotify = telenotify
+        self.gatekeeper_storage = gatekeeper_storage
+        self.coin_name = coin_name
+        self.orders = orders
 
-    def send_buy_notify(self):
-        last_order = get_orders.get_order_history()[0]
+    def send_sell_notify(self, last_order: dict):
         last_order_price = float(last_order["avgPrice"])
         coin_qty = float(last_order["cumExecQty"])
+        balance = self.gatekeeper_storage.get_balance()
+        if not isinstance(coin_qty, float | int):
+            raise AttributeError("Invalid value in the coin qty")
+        if not isinstance(last_order_price, int | float):
+            raise TypeError(
+                f"Argument last_order have an invalid type '{type(last_order).__name__}'. Not 'int' or 'float'"
+            )
+        if not balance or balance == {}:
+            raise AttributeError("Balance is empty!")
+        if not "USDT" in balance.keys():
+            raise KeyError('Gatekeeper do not contains key named "USDT"')
         self.telenotify.sold(
-            f"Bot was sold```\n{coin_qty:.10f} {self.coin_name} for {last_order_price}.\nTotal: price: {coin_qty*last_order_price}```"
+            f"Bot was sold```\n{coin_qty:.10f} {self.coin_name} for {last_order_price}.\nTotal: price: {coin_qty*last_order_price}\nBalance: {balance}```"
         )
 
 
-class Sell(Checkup):
+class Sell:
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.journal = JournalManager()
-        self.trigger = CrossKlinesTrigger()
+    def __init__(
+        self,
+        journal: JournalManager,
+        trigger: CrossKlinesTrigger,
+        checkup: Checkup,
+        gatekeeper_storage: GatekeeperStorage,
+        orders: Orders,
+        notifier: Notifier,
+        metamanager: MetaManager,
+    ) -> None:
+        self.journal = journal
+        self.trigger = trigger
+        self.checkup = checkup
+        self.gatekeeper_storage = gatekeeper_storage
+        self.orders = orders
+        self.notifier = notifier
+        self.metamanager = metamanager
 
     def activate(self) -> bool:
-        logger.info("Trying to close positions")
-        if self.price_valid():
+        if self.checkup.valid_price():
             logger.debug("Price valid for sell")
             if self.trigger.cross_up_to_down():
                 logger.debug("Trigger cross_up_to_down activated")
-                gatekeeper_storage.update_balance()
-                if get_orders.place_sell_order():
-                    logger.info("Sell order placed successfully")
-                    time.sleep(2)
-                    Notifier().send_buy_notify()
-                    logger.info("Notification sent for sell")
-                    MetaManager().update_all(type="sell")
-                    self.journal.clear()
-                    logger.info("Journal cleared after sell")
-                    return True
+                if self.gatekeeper_storage.update_balance():
+                    if self.orders.place_sell_order():
+                        last_order = self.orders.get_order_history()[0]
+                        logger.info("Sell order placed successfully")
+                        time.sleep(2)
+                        self.notifier.send_sell_notify()
+                        logger.info("Notification sent for sell")
+                        self.metamanager.update_all(
+                            type="sell", value=float(last_order["avgPrice"])
+                        )
+                        self.journal.clear()
+                        logger.info("Journal cleared after sell")
+                        return True
