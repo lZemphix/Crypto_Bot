@@ -2,8 +2,8 @@
     "symbol": "ETHUSDT",
     "interval": 5,
     "amountBuy": 5.5,
-    "RSI": 2,
-    "stepBuy": 750.0,
-    "stepSell": 700.0,
+    "RSI": 41,
+    "stepBuy": 80.0,
+    "stepSell": 80.0,
     "send_notify": true
 }
