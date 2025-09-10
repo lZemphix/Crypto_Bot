@@ -7,96 +7,85 @@
 {% endblock title_css %}
 
 {% block main %}
-<main class="main-container">
-
+<main>
     <div class="bot-info-container">
         <div class="bot-base-info-container">
-            <div class="bot-info-text">Bot information</div>
-            <div class="bot-info-content">
-                <div class="tag-text">
-                    <div class="tag">Status:</div>
-                    <div class="tag">Pair:</div>
-                    <div class="tag">Balance(q):</div>
-                    <div class="tag">Balance(b):</div>
-                </div>
-                <div class="status-text">
-                    <div class="status" id="status">{{ status }}</div>
-                    <div class="status" id="pair">{{ pair }}</div>
-                    <div class="status" id="balanceq">{{ balanceq }}</div>
-                    <div class="status" id="balanceb">{{ balanceb }}</div>
-                </div>
-            </div>
+            <table>
+                <thead>
+                    <tr class="container-header">
+                        <th>Bot information</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Status: </td>
+                        <td>{{ status }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pair: </td>
+                        <td>{{ pair }}</td>
+                    </tr>
+                    <tr>
+                        <td>Balance(q): </td>
+                        <td>{{ balanceq }}</td>
+                    </tr>
+                    <tr>
+                        <td>Balance(b): </td>
+                        <td>{{ balanceb }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div class="bot-actions-container">
-            <div class="actions-group">
-                <div class="actual-actions-container">
-                    <div class="bot-actions-text">Actual state</div>
-                    <div class="bot-actions-content">
-                        <div class="tag-text">
-                            <div class="tag">Orders amount:</div>
-                            <div class="tag">Avg order price:</div>
-                            <div class="tag">Min. price for sell:</div>
-                            <div class="tag">Min. price for average:</div>
-                        </div>
-                        <div class="status-text">
-                            <div class="status" id="orders_amount">{{ actual.orders_amount }}</div>
-                            <div class="status" id="avg_order_price">{{ actual.avg_order_price }}</div>
-                            <div class="status" id="closest_s_line">{{ actual.closest_s_line }}</div>
-                            <div class="status" id="closest_a_line">{{ actual.closest_a_line }}</div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="last-action-container">
-                    <div class="bot-actions-text">Last action</div>
-                    <div class="bot-actions-content">
-                        <div class="tag-text">
-                            <div class="tag">Type:</div>
-                            <div class="tag">Date:</div>
-                        </div>
-                        <div class="status-text">
-                            <div class="status" id="type">{{ last_action.type }}</div>
-                            <div class="status" id="date">{{ last_action.date }}</div>
-                        </div>
-                    </div><!-- bot actions content -->
-                </div><!-- last actions content -->
-            </div><!-- actions group -->
-        </div><!-- bot actions container -->
-    </div> <!-- info container -->
-
-
-    <div class="graph-container">
-        <div class="graph-text">Graph</div>
-        <div class="tradingview-widget-container">
-            <script type="text/javascript"
-                src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-                    {
-                        "allow_symbol_change": false,
-                            "calendar": false,
-                                "hide_side_toolbar": true,
-                                    "hide_top_toolbar": false,
-                                        "hide_legend": true,
-                                            "hide_volume": true,
-                                                "hotlist": false,
-                                                    "interval": "{{ interval }}",
-                                                        "locale": "en",
-                                                            "save_image": false,
-                                                                "style": "1",
-                                                                    "symbol": "BYBIT:{{ pair }}",
-                                                                        "theme": "dark",
-                                                                            "timezone": "Etc/UTC",
-                                                                                "backgroundColor": "rgba(150, 150, 150, 1)",
-                                                                                    "gridColor": "rgba(0, 0, 0, 0.1)",
-                                                                                        "watchlist": [],
-                                                                                            "withdateranges": false,
-                                                                                                "compareSymbols": [],
-                                                                                                    "studies": [],
-                                                                                                        "width": 1128,
-                                                                                                            "height": 586
-                    }
-                </script>
+            <table class="actual-actions">
+                <thead>
+                    <tr class="container-header">
+                        <th>Actual state</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Orders amount: </td>
+                        <td>{{ actual.orders_amount }}</td>
+                    </tr>
+                    <tr>
+                        <td>Avg order price: </td>
+                        <td>{{ actual.avg_order_price }}</td>
+                    </tr>
+                    <tr>
+                        <td>Min. price for sell: </td>
+                        <td>{{ actual.closest_s_line }}</td>
+                    </tr>
+                    <tr>
+                        <td>Min. price for average: </td>
+                        <td>{{ actual.closest_a_line }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+        <div class="last-action-container">
+            <table class="actual-actions">
+                <thead>
+                    <tr class="container-header">
+                        <th>Last action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Type: </td>
+                        <td>{{ last_action.type }}</td>
+                    </tr>
+                    <tr>
+                        <td>Date: </td>
+                        <td>{{ last_action.date }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div><!-- last actions content -->
+    </div><!-- bot actions container -->
+    <div class="graph-container">
+        <div class="container-header"><b>Graph</b></div>
+        <div class="graph">will be available soon...</div>
     </div>
 </main>
 {% endblock main %}

@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 from datetime import datetime
 
 
-def generate_trade_chart(klines: list, trade_history: dict) -> io.BytesIO:
+async def generate_trade_chart(klines: list, trade_history: dict) -> io.BytesIO:
     """
     Generates a chart from kline and trade history data.
 

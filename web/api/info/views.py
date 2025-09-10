@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from utils.auth import verify
+import tomllib
 
 from fastapi.templating import Jinja2Templates
 
@@ -10,4 +11,9 @@ router = APIRouter(prefix="/info")
 
 @router.get("/", dependencies=[Depends(verify)])
 async def index(request: Request):
-    return templates.TemplateResponse(request=request, name="info.html")
+    with open("pyproject.toml", "rb") as f:
+        version = tomllib.load(f)["project"]["version"]
+    context = {"version": version}
+    return templates.TemplateResponse(
+        request=request, name="info.html", context=context
+    )
