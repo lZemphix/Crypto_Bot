@@ -28,7 +28,7 @@ class Checkup:
 class Notifier:
 
     def __init__(
-        self,
+        self, 
         telenotify: Telenotify,
         coin_name: str,
         gatekeeper_storage: GatekeeperStorage,
@@ -43,16 +43,6 @@ class Notifier:
         last_order_price = float(last_order["avgPrice"])
         coin_qty = float(last_order["cumExecQty"])
         balance = self.gatekeeper_storage.get_balance()
-        if not isinstance(coin_qty, float | int):
-            raise AttributeError("Invalid value in the coin qty")
-        if not isinstance(last_order_price, int | float):
-            raise TypeError(
-                f"Argument last_order have an invalid type '{type(last_order).__name__}'. Not 'int' or 'float'"
-            )
-        if not balance or balance == {}:
-            raise AttributeError("Balance is empty!")
-        if not "USDT" in balance.keys():
-            raise KeyError('Gatekeeper do not contains key named "USDT"')
         self.telenotify.sold(
             f"Bot was sold```\n{coin_qty:.10f} {self.coin_name} for {last_order_price}.\nTotal: price: {coin_qty*last_order_price}\nBalance: {balance}```"
         )
@@ -88,7 +78,7 @@ class Sell:
                         last_order = self.orders.get_order_history()[0]
                         logger.info("Sell order placed successfully")
                         time.sleep(2)
-                        self.notifier.send_sell_notify()
+                        self.notifier.send_sell_notify(last_order)
                         logger.info("Notification sent for sell")
                         self.metamanager.update_all(
                             type="sell", value=float(last_order["avgPrice"])
