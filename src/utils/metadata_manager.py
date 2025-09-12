@@ -64,7 +64,11 @@ class MetaManager:
 
     def update_previous_actions(self, type: MetaPreviousTypes, value: float | int):
         data = self.get()
-        data["previous_actions"][type.value].append(value)
+        template = {
+            "date": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S"),
+            "price" : value
+        }
+        data["previous_actions"][type.value].append(template)
         with open(self.path, "w") as f:
             json.dump(data, f, indent=4)
 
